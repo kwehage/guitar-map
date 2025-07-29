@@ -19,7 +19,10 @@ The below diagram shows a fretboard diagram for an 8-string guitar in drop-E tun
 ![fretboard](doc/fretboard.png)
 
 ## Requirements
-This program is built on the python `dash` and `dash-bootstrap-components` libraries. To run the program, install the dependencies natively on your system using your package manager, or set up a virtual environment. Once you have set up your environment, then run:
+This program is built on the python `dash` and `dash-bootstrap-components` libraries. To run the program, install the dependencies natively on your system using your package manager, or set up a virtual environment. 
+
+## Usage
+Once you have set up your environment, then run:
 
 ```
 python plot_fretboard.py
