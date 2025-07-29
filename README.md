@@ -15,6 +15,7 @@ From those inputs it displays:
 * All chord voicings of the scale, click on the chord to display all the fretboard positions that are in the chord.
 
 The below diagram shows a fretboard diagram for an 8-string guitar in drop-E tuning, using the diatonic scale, and Aeolian (natural minor) mode. Therefore the fretboard map is in E-minor. The E-minor chord is highlighted on the fretboard.
+
 ![fretboard](doc/fretboard.png)
 
 ## Requirements
