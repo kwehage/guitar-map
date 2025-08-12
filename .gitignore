@@ -1,0 +1,6 @@
+out
+*.swb
+*.swp
+*.swo
+package-lock.json
+node_modules
