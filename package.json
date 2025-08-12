@@ -1,5 +1,5 @@
 {
-  "name": "guitar_map",
+  "name": "guitar-map",
   "version": "1.0.0",
   "description": "Procedurally generate guitar fretboard diagrams",
   "keywords": [
