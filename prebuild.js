@@ -4,10 +4,9 @@ const path = require('path');
 
 const venvPath = path.join(__dirname, '.venv');
 
-// Determine the command based on the operating system
 const command = os.platform() === 'win32'
-    ? `python -m venv ${venvPath} && ${venvPath}\\Scripts\\pip install -r requirements.txt`
-    : `python3 -m venv ${venvPath} && ${venvPath}/bin/pip install -r requirements.txt`;
+    ? `python -m venv ${venvPath} && ${venvPath}\\Scripts\\pip install --upgrade pip && ${venvPath}\\Scripts\\pip install -r requirements.txt`
+    : `python3 -m venv ${venvPath} && ${venvPath}/bin/pip install --upgrade pip && ${venvPath}/bin/pip install -r requirements.txt`;
 
 // Execute the command
 exec(command, (error, stdout, stderr) => {
