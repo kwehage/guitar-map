@@ -4,34 +4,28 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
+    name: "Guitar Map",
+    executableName: "guitar-map",
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {
-        bin: 'Guitar Map',
-      },
+      config: {},
     },
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
-      config: {
-        bin: 'Guitar Map',
-      },
+      config: {},
     },
     {
       name: '@electron-forge/maker-dmg',
       platforms: ['darwin'],
-      config: {
-        bin: 'Guitar Map',
-      },
+      config: {},
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {
-        bin: 'Guitar Map',
-      },
+      config: {},
     },
     // {
     //   name: '@electron-forge/maker-rpm',
