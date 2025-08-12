@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require('electron/main')
 const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
+const os = require('os');
 
 let mainWindow;
 let dashServer;
@@ -62,7 +63,10 @@ function killDashServer() {
 
 app.on('ready', () => {
   const dashAppPath = path.join(__dirname, 'guitar_map.py');
-  dashServer = spawn('python', [dashAppPath]);
+  const pythonExecutable = os.platform() === 'win32'
+    ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
+    : path.join(__dirname, '.venv', 'bin', 'python');
+  dashServer = spawn((pythonExecutable, [dashAppPath]);
 
   dashServer.stdout.on('data', (data) => {
     console.log(`Dash Server: ${data}`);
