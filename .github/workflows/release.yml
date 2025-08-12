@@ -1,4 +1,5 @@
-name: Build macOS Package
+name: Build Packages
+
 permissions:
   contents: write
 
@@ -9,7 +10,15 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os:
+          [
+            { name: 'linux', image: 'ubuntu-latest' },
+            { name: 'windows', image: 'windows-latest' },
+            { name: 'macos', image: 'macos-latest' },
+          ]
+    runs-on: ${{ matrix.os.image }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
