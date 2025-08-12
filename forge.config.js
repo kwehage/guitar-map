@@ -9,19 +9,29 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        bin: 'Guitar Map',
+      },
     },
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
+      config: {
+        bin: 'Guitar Map',
+      },
     },
     {
       name: '@electron-forge/maker-dmg',
       platforms: ['darwin'],
+      config: {
+        bin: 'Guitar Map',
+      },
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        bin: 'Guitar Map',
+      },
     },
     // {
     //   name: '@electron-forge/maker-rpm',
