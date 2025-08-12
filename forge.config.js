@@ -4,8 +4,6 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    name: "guitar-map",
-    executableName: "guitar-map",
   },
   rebuildConfig: {},
   makers: [
