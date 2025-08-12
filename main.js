@@ -6,6 +6,8 @@ const http = require('http');
 let mainWindow;
 let dashServer;
 
+if (require('electron-squirrel-startup')) app.quit();
+
 function createWindow() {
   mainWindow = new BrowserWindow({
       webPreferences: {
