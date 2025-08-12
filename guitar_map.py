@@ -125,7 +125,7 @@ def is_octave_of_note(note, comparison):
 
 if __name__ == "__main__":
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+    app.title = "Guitar Map"
     num_frets = 24
     num_strings = 8
     fretboard_color = "black"
@@ -462,7 +462,7 @@ if __name__ == "__main__":
                 chords_in_scale.append(chord_in_scale)
                 if chord_in_scale:
                     num_chords_in_scale[-1] += 1
-                    print(i + 1, chord, intervals, notes_in_chord)
+                    # print(i + 1, chord, intervals, notes_in_chord)
 
         div_styles = [
             copy.copy(style) for _ in range(len(chord_intervals.keys()) * 7)
@@ -477,8 +477,8 @@ if __name__ == "__main__":
                 column_styles[i]["display"] = "none"
                 column_styles[i]["width"] = 0
 
-        print(chords_in_scale)
-        print(num_chords_in_scale)
+        #print(chords_in_scale)
+        # print(num_chords_in_scale)
         row_style = {"height": 30, "width": 55 * len(chord_intervals.keys()), "justify": "start"}
         row_styles = [
             copy.copy(row_style) for _ in range(7)
@@ -581,7 +581,7 @@ if __name__ == "__main__":
         notes_in_scale = notes_in_scale[n:] + notes_in_scale[:n]
         root = notes_in_scale[0]
 
-        print(notes_in_scale)
+        # print(notes_in_scale)
 
         string_labels = [validate_note(note) for note in string_labels]
 

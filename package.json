@@ -1,0 +1,34 @@
+{
+  "name": "guitar_map",
+  "version": "1.0.0",
+  "description": "Procedurally generate guitar fretboard diagrams",
+  "keywords": [
+    "Guitar",
+    "fretboard",
+    "diagrams",
+    "music",
+    "theory",
+    "chords",
+    "scales",
+    "modes"
+  ],
+  "homepage": "https://github.com/kwehage/guitar-map#readme",
+  "bugs": {
+    "url": "https://github.com/kwehage/guitar-map/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kwehage/guitar-map.git"
+  },
+  "license": "ISC",
+  "author": "Kristopher Wehage",
+  "type": "commonjs",
+  "main": "main.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
