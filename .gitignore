@@ -5,7 +5,7 @@ out
 package-lock.json
 node_modules
 __pycache__/
-myenv
 *.pyc
 *.pyo
 .DS_Store
+.venv
