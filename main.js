@@ -28,36 +28,36 @@ function createWindow() {
 
 
 function checkDashServerReady(callback) {
-    const options = {
-        hostname: '127.0.0.1',
-        port: 8050,
-        path: '/',
-        method: 'GET',
-    };
+  const options = {
+    hostname: '127.0.0.1',
+    port: 8050,
+    path: '/',
+    method: 'GET',
+  };
 
-    const req = http.request(options, (res) => {
-        if (res.statusCode === 200) {
-            callback();
-        } else {
-            setTimeout(() => checkDashServerReady(callback), 1000); // Retry after 1 second
-        }
-    });
+  const req = http.request(options, (res) => {
+    if (res.statusCode === 200) {
+      callback();
+    } else {
+      setTimeout(() => checkDashServerReady(callback), 1000); // Retry after 1 second
+    }
+  });
 
-    req.on('error', () => {
-        setTimeout(() => checkDashServerReady(callback), 1000); // Retry after 1 second
-    });
+  req.on('error', () => {
+    setTimeout(() => checkDashServerReady(callback), 1000); // Retry after 1 second
+  });
 
-    req.end();
+  req.end();
 } 
 
 function killDashServer() {
   if (dashServer) {
-      console.log('Attempting to kill Dash server...');
-      dashServer.kill('SIGTERM'); // Attempt graceful shutdown
-      setTimeout(() => {
-          console.log('Forcefully killing Dash server...');
-          dashServer.kill('SIGKILL'); // Forcefully kill if not terminated
-      }, 5000); // Wait for 5 seconds before forcefully killing
+    console.log('Attempting to kill Dash server...');
+    dashServer.kill('SIGTERM'); // Attempt graceful shutdown
+    setTimeout(() => {
+      console.log('Forcefully killing Dash server...');
+      dashServer.kill('SIGKILL'); // Forcefully kill if not terminated
+    }, 5000); // Wait for 5 seconds before forcefully killing
   }
 }
 
@@ -66,7 +66,7 @@ app.on('ready', () => {
   const pythonExecutable = os.platform() === 'win32'
     ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
     : path.join(__dirname, '.venv', 'bin', 'python');
-  dashServer = spawn((pythonExecutable, [dashAppPath]);
+  dashServer = spawn(pythonExecutable, [dashAppPath]);
 
   dashServer.stdout.on('data', (data) => {
     console.log(`Dash Server: ${data}`);
@@ -105,7 +105,7 @@ app.on('will-quit', () => {
 })
 
 process.on('SIGINT', () => {
-    console.log('Received SIGINT. Closing Dash server...');
-    killDashServer();
-    app.quit(); // Quit the Electron app
+  console.log('Received SIGINT. Closing Dash server...');
+  killDashServer();
+  app.quit(); // Quit the Electron app
 });  

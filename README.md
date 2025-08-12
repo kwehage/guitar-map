@@ -18,22 +18,40 @@ The below diagram shows a fretboard diagram for an 8-string guitar in drop-E tun
 
 ![fretboard](doc/fretboard.png)
 
-## Requirements
-This program is built on the python `dash` and `dash-bootstrap-components` libraries. To run the program, install the dependencies natively on your system using your package manager, or set up a virtual environment. 
-
 ## Usage
-
-### As a python application
-Once you have set up your environment, then run:
-
+### Using package manager
+This program is built on the python `dash` and `dash-bootstrap-components` libraries. To run the program, install the dependencies natively on your system using your package manager, then run:
 ```
 python guitar_map.py
 ```
-
 and point your web browser to `http://127.0.0.1:8050/`
+
+### With a virtual environment
+
+On Mac/Linux
+```
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade
+pip install -r requirements.txt
+.venv/bin/python guitar_map.py
+```
+
+On Windows
+```
+python -m venv .venv
+.venv/Scripts/activate
+pip install --upgrade
+pip install -r requirements.txt
+.venv/Scripts/python.exe guitar_map.py
+```
 
 ### With Electron
 Alternatively, you can use Electron to run the application. After you have installed Electron on your system, run:
 ```
-npm run start
+npm install
+npm start
 ```
+
+### Using prebuilt binaries
+Download the binary for your system at https://github.com/kwehage/guitar-map/releases
