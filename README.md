@@ -46,7 +46,7 @@ xattr -rc /Applications/guitar-map.app
 See [this link](https://osxdaily.com/2019/02/13/fix-app-damaged-cant-be-opened-trash-error-mac/) for more information.
 
 #### Windows
-* Download and run the installer at https://github.com/kwehage/guitar-map/releases/download/v1.0.0/ guitar-map-1.0.0.Setup.exe 
+* Download and run the installer at https://github.com/kwehage/guitar-map/releases/download/v1.0.0/guitar-map-1.0.0.Setup.exe 
 * Launch the guitar-map application
 
 
