@@ -28,6 +28,10 @@ jobs:
         with:
           node-version: '24'  # Specify your Node.js version
 
+      - name: Prebuild step                                                      
+        if: matrix.os.name == 'linux'                                           
+        run: apt install flatpak flatpak-builder elfutils && flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo 
+          
       - name: Install dependencies
         run: npm install
 
