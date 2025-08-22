@@ -20,7 +20,7 @@ The below diagram shows a fretboard diagram for an 8-string guitar in drop-E tun
 
 ## Usage
 `guitar_map` is a python application that plots a guitar fretboard using the python [dash](https://pypi.org/project/dash/) and [dash-bootstrap-components](https://pypi.org/project/dash-bootstrap-components/) libraries. The python script start a simple webserver at `http://localhost:8050`, and you can visualize and change the settings from your web browser. There are two ways to launch the application. 
-* If you are not comfortable using the terminal, the program is also offered as an electron application which starts the webserver and web browser for you and runs self-contained in a stand-alone application. The executable is packaged for a variety of operating systems which you can download at https://github.com/kwehage/guitar-map/releases. 
+* If you are not comfortable using the terminal, the program is also offered as a self-contained electron application which starts the webserver and web browser for you. The executable is packaged for a variety of operating systems which you can download at https://github.com/kwehage/guitar-map/releases. 
 * If you are comfortable using the terminal, you can start the python server and point your web browser to `http://localhost:8050`. 
 
 ### Using prebuilt binaries
@@ -109,7 +109,7 @@ then point your web browser to `http://127.0.0.1:8050/`
 
 
 #### Run with Electron from the command-line
-Alternatively, you can use Electron to run the standalone application, which launches the python web server and browser in one application. First, download the code as described above. Then ensure that [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) is available on your system. Then run:
+Alternatively, you can use Electron to run the standalone application, which launches the python web server and browser in one application. First, download the guitar-map repository as described above. Then ensure that [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) is available on your system. Then run:
 ```
 npm install
 npm start
