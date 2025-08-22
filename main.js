@@ -62,10 +62,12 @@ function killDashServer() {
 }
 
 app.on('ready', () => {
-  const dashAppPath = path.join(__dirname, 'guitar_map.py');
   const pythonExecutable = os.platform() === 'win32'
-    ? path.join(__dirname, '.venv', 'Scripts', 'python.exe')
-    : path.join(__dirname, '.venv', 'bin', 'python');
+    ? path.join(__dirname, 'dist', 'venv', 'Scripts', 'python.exe')
+    : path.join(__dirname, 'dist', 'venv', 'bin', 'python');
+  const dashAppPath = path.join(__dirname, 'dist', 'guitar_map.py');
+  console.log(pythonExecutable);
+  console.log(dashAppPath);
   dashServer = spawn(pythonExecutable, [dashAppPath]);
 
   dashServer.stdout.on('data', (data) => {

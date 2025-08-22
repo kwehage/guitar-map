@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const os = require('os');
 const path = require('path');
 
-const venvPath = path.join(__dirname, '.venv');
+const venvPath = path.join(__dirname, 'dist', 'venv');
 
 const command = os.platform() === 'win32'
     ? `python -m venv ${venvPath} && ${venvPath}\\Scripts\\pip install --upgrade pip && ${venvPath}\\Scripts\\pip install -r requirements.txt`
