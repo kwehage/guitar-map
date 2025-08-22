@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set up python virtual environment
+        run: npm run prebuild
+
       - name: Publish binaries
         run: npm run publish
         env:
