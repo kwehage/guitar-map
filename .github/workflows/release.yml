@@ -5,8 +5,8 @@ permissions:
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -26,16 +26,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '24'  # Specify your Node.js version
+          node-version: '24'
 
-      - name: Prebuild step                                                      
-        if: matrix.os.name == 'linux'                                           
-        run: sudo apt install flatpak flatpak-builder elfutils && flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo 
-          
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install libfuse2 (AppImage build dependency)
+        if: matrix.os.name == 'linux'
+        run: sudo apt-get install -y libfuse2
+
       - name: Install dependencies
         run: npm install
 
-      - name: Set up python virtual environment
+      - name: Build PyInstaller executable
         run: npm run prebuild
 
       - name: Publish binaries

@@ -1,116 +1,112 @@
 # Guitar Map
 
-Guitar Map is a work-in-progress tool to procedurally generate and display fretboard diagrams for 4-10 string guitars and basses. This tool is intended to help guitarists familiarize themselves with the fretboard and basic music theory, especially to help understand how the relative positions between notes and chords changes when you use non-standard tunings or more than six strings. 
+Guitar Map is a tool to procedurally generate and display fretboard diagrams for 4–10 string guitars and basses. It is intended to help guitarists familiarise themselves with the fretboard and basic music theory, particularly when using non-standard tunings or more than six strings.
 
 The tool allows you to configure:
 * The number of strings
 * Tuning for each string
-* Tonic (root note) of the first mode of the scale: for example, if you input C as the tonic for the diatonic scale, it will create a C-Major scale if the Ionian (natural major) mode is selected. If you select the Aeolian (natural minor) mode, it will generate an A minor scale. 
-* Scale (e.g. diatonic scale, harmonic minor, melodic minor, hungarian minor, etc. Hover over the scale name for a tool-tip with alternate names for each scale) 
-* Mode of the scale (hover over the mode for a tool-tip with alternate names for each mode)
+* Tonic (root note) of the first mode of the scale — for example, inputting C as the tonic for the diatonic scale with the Ionian (natural major) mode selected produces a C-Major scale; selecting the Aeolian (natural minor) mode produces a relative A-minor scale.
+* Scale (diatonic, harmonic minor, melodic minor, Hungarian minor, pentatonic, blues, augmented, diminished — hover over a mode name for a tooltip listing alternate names)
+* Mode of the scale
 
 From those inputs it displays:
-* A fretboard diagram with all positions on the fretboard labeled (hover over the fretboard position with your mouse to see the note name and frequency)
-* All notes in the scale/mode are shown with circles. The tonic of the mode is shown in black (as described above, the tonic of the current mode selected may differ from the tonic of the first mode for the scale that is used to generate the scale)
-* All chord voicings of the scale, click on the chord to display all the fretboard positions that are in the chord.
+* A fretboard diagram with every position labelled — hover over any position to see the note name and frequency in Hz.
+* All notes in the scale highlighted with circles; the tonic of the current mode is shown in black.
+* All diatonic chord voicings for the scale; click a chord to highlight every matching position on the fretboard.
 
-The below diagram shows a fretboard diagram for an 8-string guitar in drop-E tuning, using the diatonic scale, and Aeolian (natural minor) mode. Therefore the fretboard map is in E-minor. The E-minor chord is highlighted on the fretboard.
+Settings (string count, tuning, tonic, scale, mode, and theme) are saved automatically to `~/.guitar_map.json` and restored on next launch. Named settings files can be saved and loaded via **File → Save / Open**.
+
+The diagram below shows an 8-string guitar in drop-E tuning, diatonic scale, Aeolian (natural minor) mode — i.e. E-minor — with the E-minor chord highlighted.
 
 ![fretboard](doc/fretboard.png)
 
-## Usage
-`guitar_map` is a python application that plots a guitar fretboard using the python [dash](https://pypi.org/project/dash/) and [dash-bootstrap-components](https://pypi.org/project/dash-bootstrap-components/) libraries. The python script start a simple webserver at `http://localhost:8050`, and you can visualize and change the settings from your web browser. There are two ways to launch the application. 
-* If you are not comfortable using the terminal, the program is also offered as a self-contained electron application which starts the webserver and web browser for you. The executable is packaged for a variety of operating systems which you can download at https://github.com/kwehage/guitar-map/releases. 
-* If you are comfortable using the terminal, you can start the python server and point your web browser to `http://localhost:8050`. 
+## Known limitations
 
-### Using prebuilt binaries
-Download the pre-built binary for your system at https://github.com/kwehage/guitar-map/releases
+* Chord voicings are displayed for all positions across the neck without filtering by playability (hand span, fretting difficulty, or string-skip constraints).
+* There is no audio playback or MIDI export.
+* Enharmonic equivalents are not disambiguated — notes are always displayed in their sharp form (e.g. F# rather than Gb).
 
-#### Linux (Debian-based)
+## Installation
+
+### Prebuilt binaries (recommended)
+
+Download the latest release for your platform from **[https://github.com/kwehage/guitar-map/releases](https://github.com/kwehage/guitar-map/releases)**.
+
+#### Linux (AppImage)
+
+```bash
+# Download the AppImage (replace x.y.z with the version number)
+wget https://github.com/kwehage/guitar-map/releases/download/vx.y.z/guitar-map-x.y.z.AppImage
+chmod +x guitar-map-x.y.z.AppImage
+./guitar-map-x.y.z.AppImage
 ```
-wget https://github.com/kwehage/guitar-map/releases/download/v1.0.0/guitar-map_1.0.0_amd64.deb
-sudo dpkg -i guitar-map_1.0.0_amd64.deb
+
+No installation or root access is required. The AppImage is self-contained and runs on any modern x86-64 Linux distribution.
+
+##### Desktop integration (optional)
+
+To make Guitar Map appear in your application launcher, install the provided desktop entry. The install script places the launcher file and icon under `~/.local/share/` (no root required) and bakes the absolute path to the AppImage into the launcher. If you move the AppImage after installation, re-run the install script to update the path.
+
+```bash
+# Clone the repo (only needed for the install script and icon)
+git clone https://github.com/kwehage/guitar-map
+cd guitar-map
+
+# Pass the path to the AppImage you downloaded
+bash linux/install-desktop-entry.sh /path/to/guitar-map-x.y.z.AppImage
 ```
 
-#### Mac
-* Download https://github.com/kwehage/guitar-map/releases/download/v1.0.0/guitar-map-1.0.0-arm64.dmg
-* Double-click the dmg, and drag the guitar-map application to your applications folder.
+To uninstall the desktop entry:
 
-If you get an error that says the application is damaged and can't be opened; the error is due to Apple's security policy. Apple marks applications as quarantined unless they are downloaded through their app store. As a temporary workaround, you can follow the instructions [here](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac). Alternatively, you can fix the error permanently by removing the quarantine from the file at the command-line as:
-
+```bash
+rm ~/.local/share/applications/guitar-map.desktop
+rm ~/.local/share/icons/hicolor/256x256/apps/guitar-map.png
+update-desktop-database ~/.local/share/applications
 ```
+
+#### macOS
+
+* Download the `.dmg` from the releases page.
+* Double-click the dmg and drag the guitar-map application to your Applications folder.
+
+If macOS reports that the application is damaged and cannot be opened, this is Apple's Gatekeeper quarantine policy for applications distributed outside the App Store. Remove the quarantine attribute from the terminal:
+
+```bash
 xattr -rd com.apple.quarantine /Applications/guitar-map.app
 xattr -rc /Applications/guitar-map.app
 ```
 
-See [this link](https://osxdaily.com/2019/02/13/fix-app-damaged-cant-be-opened-trash-error-mac/) for more information.
+See [this guide](https://osxdaily.com/2019/02/13/fix-app-damaged-cant-be-opened-trash-error-mac/) for more detail.
 
 #### Windows
-* Download and run the installer at https://github.com/kwehage/guitar-map/releases/download/v1.0.0/guitar-map-1.0.0.Setup.exe 
-* Launch the guitar-map application
 
+* Download and run the `.exe` installer from the releases page.
+* Launch guitar-map from the Start menu or desktop shortcut.
 
-### Starting from the command-line
+### Running from source
+
+`guitar_map` is a Python application built on [Dash](https://pypi.org/project/dash/) and [dash-bootstrap-components](https://pypi.org/project/dash-bootstrap-components/). Running from source starts a local web server at `http://127.0.0.1:8050`; open that URL in any browser to use the application.
 
 #### Install dependencies
-This program is built on the python [dash](https://pypi.org/project/dash/) and [dash-bootstrap-components](https://pypi.org/project/dash-bootstrap-components/) libraries. To run the program, install the dependencies natively on your system using pip or your system package manager. For example to install using pip, run:
 
-```
+```bash
 pip install dash dash-bootstrap-components
 ```
 
-Alternatively, you can install the dependencies in a "virtual environment" to avoid interfering with your system packages.
+Or in a virtual environment:
 
-On Mac/Linux
-```
+```bash
 git clone https://github.com/kwehage/guitar-map
 cd guitar-map
-python -m venv dist/venv
-source dist/venv/bin/activate
-pip install --upgrade
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-On Windows
-```
-git clone https://github.com/kwehage/guitar-map
-cd guitar-map
-python -m venv dist/venv
-dist/venv/Scripts/activate
-pip install --upgrade
-pip install -r requirements.txt
-```
+#### Run
 
-#### Get the code
-```
-git clone https://github.com/kwehage/guitar-map
-cd guitar-map
-```
-
-#### Run with Python from command-line
-To run using your system `dash` and `dash-bootstrap-components` libraries, run:
-```
+```bash
 python dist/guitar_map.py
 ```
 
-To run using the `dash` and `dash-bootstrap-components` libraries in your virtual environment:
-
-On Linux/Mac:
-```
-dist/venv/bin/python guitar_map.py
-```
-
-On Windows:
-```
-dist/venv/Scripts/python.exe guitar_map.py
-```
-
-then point your web browser to `http://127.0.0.1:8050/`
-
-
-#### Run with Electron from the command-line
-Alternatively, you can use Electron to run the standalone application, which launches the python web server and browser in one application. First, download the guitar-map repository as described above. Then ensure that [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) is available on your system. Then run:
-```
-npm install
-npm start
-```
+Then open `http://127.0.0.1:8050` in your browser.

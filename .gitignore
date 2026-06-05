@@ -9,3 +9,7 @@ __pycache__/
 *.pyo
 .DS_Store
 dist/venv
+dist/guitar_map
+dist/guitar_map.exe
+.build_venv
+.build_work

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Guitar Map
+Comment=Fretboard diagram generator for 4-10 string guitars and basses
+Exec=APPIMAGE_PATH
+Icon=guitar-map
+Terminal=false
+Categories=Audio;Music;Education;
+Keywords=guitar;bass;fretboard;music theory;scales;chords;tuning;
+StartupWMClass=guitar-map
