@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guitar Map</title>
+  <script src="plotly.min.js"></script>
+  <style>
+    :root {
+      --gm-bg:          #ffffff;
+      --gm-surface:     #f8f9fa;
+      --gm-text:        #212529;
+      --gm-border:      #ced4da;
+      --gm-btn-bg:      #e9ecef;
+      --gm-btn-text:    #212529;
+      --gm-input-bg:    #ffffff;
+    }
+    [data-theme="dark"] {
+      --gm-bg:          #1e1e2e;
+      --gm-surface:     #2a2a3e;
+      --gm-text:        #cdd6f4;
+      --gm-border:      #585b70;
+      --gm-btn-bg:      #313244;
+      --gm-btn-text:    #cdd6f4;
+      --gm-input-bg:    #2a2a3e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background-color: var(--gm-bg);
+      color: var(--gm-text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      overflow-x: hidden;
+    }
+
+    select, input[type="text"] {
+      background-color: var(--gm-input-bg);
+      color: var(--gm-text);
+      border: 1px solid var(--gm-border);
+      padding: 2px 6px;
+      height: 30px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    button {
+      background-color: var(--gm-btn-bg);
+      color: var(--gm-btn-text);
+      border: 1px solid var(--gm-border);
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    button:hover { filter: brightness(0.93); }
+
+    /* ── Controls panel ── */
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding: 10px;
+      align-items: flex-start;
+    }
+
+    /* Left: string count + string inputs */
+    #left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    #right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 30px;
+    }
+    .control-row label {
+      width: 110px;
+      white-space: nowrap;
+    }
+
+    .string-input { width: 100px; }
+
+    /* ── Chord buttons ── */
+    #chord-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chord-row {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 30px;
+    }
+
+    .chord-row-label {
+      width: 110px;       /* matches .control-row label so buttons align with dropdowns */
+      text-align: right;
+      font-size: 12px;
+      flex-shrink: 0;
+      padding-right: 8px;
+    }
+
+    .chord-btn {
+      width: 52px;
+      height: 28px;
+      font-size: 11px;
+      padding: 0;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    /* ── Fretboard ── */
+    #fretboard {
+      width: 100%;
+    }
+
+    /* ── Preferences modal ── */
+    .modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.hidden { display: none; }
+
+    .modal-content {
+      background: var(--gm-surface);
+      border: 1px solid var(--gm-border);
+      border-radius: 6px;
+      padding: 20px 24px;
+      min-width: 280px;
+    }
+    .modal-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+    .modal-body {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .modal-footer button {
+      padding: 4px 18px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="controls">
+  <!-- Left: string configuration -->
+  <div id="left-panel">
+    <div class="control-row">
+      <label>Number of strings</label>
+      <select id="num-strings" style="width:100px"></select>
+    </div>
+    <div id="string-inputs"></div>
+  </div>
+
+  <!-- Right: scale/mode dropdowns, then chord buttons below -->
+  <div id="right-panel">
+    <div class="control-row">
+      <label>Tonic</label>
+      <select id="tonic" style="width:120px"></select>
+    </div>
+    <div class="control-row">
+      <label>Scale</label>
+      <select id="scale" style="width:300px"></select>
+    </div>
+    <div class="control-row">
+      <label>Mode</label>
+      <select id="mode" style="width:300px"></select>
+    </div>
+    <div style="height:8px"></div>
+    <div id="chord-buttons"></div>
+  </div>
+</div>
+
+<div id="fretboard"></div>
+
+<!-- Preferences modal -->
+<div id="preferences-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-title">Preferences</div>
+    <div class="modal-body">
+      <label for="theme-select">Theme</label>
+      <select id="theme-select" style="width:140px"></select>
+    </div>
+    <div class="modal-footer">
+      <button id="close-preferences-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file input for open (web path; Electron uses native dialog) -->
+<input type="file" id="file-input" accept=".json" style="display:none">
+
+<!-- Hidden button for Electron Preferences menu item -->
+<button id="open-preferences-btn" style="display:none"></button>
+
+<script src="guitar_map.js"></script>
+</body>
+</html>

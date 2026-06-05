@@ -34,9 +34,10 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "clean": "rm -rf dist/venv dist/guitar_map dist/guitar_map.exe .build_venv .build_work out"
+    "clean": "rm -rf dist/plotly.min.js out"
   },
   "devDependencies": {
+    "plotly.js-dist-min": "^2.35.0",
     "@electron-forge/cli": "^7.8.3",
     "@electron-forge/maker-dmg": "^7.8.3",
     "@electron-forge/maker-squirrel": "^7.8.3",
@@ -45,7 +46,7 @@
     "@electron-forge/plugin-fuses": "^7.8.3",
     "@electron-forge/publisher-github": "^7.8.3",
     "@electron/fuses": "^1.8.0",
-    "@reforged/maker-appimage": "^3.4.0",
+    "@reforged/maker-appimage": "^5.0.0",
     "electron": "37.2.6"
   },
   "dependencies": {

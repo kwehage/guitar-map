@@ -28,9 +28,6 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v5
-
       - name: Install libfuse2 (AppImage build dependency)
         if: matrix.os.name == 'linux'
         run: sudo apt-get install -y libfuse2
@@ -38,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build PyInstaller executable
+      - name: Copy Plotly.js to dist
         run: npm run prebuild
 
       - name: Publish binaries

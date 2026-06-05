@@ -14,7 +14,7 @@ From those inputs it displays:
 * All notes in the scale highlighted with circles; the tonic of the current mode is shown in black.
 * All diatonic chord voicings for the scale; click a chord to highlight every matching position on the fretboard.
 
-Settings (string count, tuning, tonic, scale, mode, and theme) are saved automatically to `~/.guitar_map.json` and restored on next launch. Named settings files can be saved and loaded via **File → Save / Open**.
+Settings (string count, tuning, tonic, scale, mode, and theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open**.
 
 The diagram below shows an 8-string guitar in drop-E tuning, diatonic scale, Aeolian (natural minor) mode — i.e. E-minor — with the E-minor chord highlighted.
 
@@ -65,15 +65,12 @@ update-desktop-database ~/.local/share/applications
 
 ##### Building the AppImage locally
 
-If you prefer to build from source rather than downloading a prebuilt binary, you will need [Node.js](https://nodejs.org/) (v18+), [uv](https://docs.astral.sh/uv/), and `libfuse2` installed.
+If you prefer to build from source rather than downloading a prebuilt binary, you will need [Node.js](https://nodejs.org/) (v18+) and `libfuse2` installed.
 
 ```bash
 # Install Node.js v22 LTS via NodeSource
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
-
-# Install uv (used by the prebuild step to create the PyInstaller bundle)
-curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Install libfuse2 (required by the AppImage runtime)
 sudo apt-get install libfuse2
@@ -81,7 +78,7 @@ sudo apt-get install libfuse2
 git clone https://github.com/kwehage/guitar-map
 cd guitar-map
 npm install
-npm run prebuild   # bundles the Python app with PyInstaller
+npm run prebuild   # copies Plotly.js into dist/
 npm run make       # produces the AppImage under out/make/
 ```
 
@@ -108,24 +105,12 @@ See [this guide](https://osxdaily.com/2019/02/13/fix-app-damaged-cant-be-opened-
 
 ### Running from source
 
-`guitar_map` is a Python application built on [Dash](https://pypi.org/project/dash/) and [dash-bootstrap-components](https://pypi.org/project/dash-bootstrap-components/). Running from source starts a local web server at `http://127.0.0.1:8050`; open that URL in any browser to use the application.
-
-[uv](https://docs.astral.sh/uv/) is the recommended way to manage the Python environment, as it pins Python 3.13 automatically without requiring a matching system Python.
-
-#### Install uv
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-#### Clone and run
+Guitar Map is a pure JavaScript + [Plotly.js](https://plotly.com/javascript/) application. Running from source requires only Node.js.
 
 ```bash
 git clone https://github.com/kwehage/guitar-map
 cd guitar-map
-uv venv --python 3.13 .venv
-uv pip install --python .venv/bin/python -r requirements.txt
-.venv/bin/python dist/guitar_map.py   # Windows: .venv\Scripts\python.exe dist\guitar_map.py
+npm install
+npm run prebuild   # copies Plotly.js into dist/
+npm start          # opens the app in an Electron window
 ```
-
-Then open `http://127.0.0.1:8050` in your browser.
