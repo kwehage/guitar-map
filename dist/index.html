@@ -7,22 +7,30 @@
   <script src="plotly.min.js"></script>
   <style>
     :root {
-      --gm-bg:          #ffffff;
-      --gm-surface:     #f8f9fa;
-      --gm-text:        #212529;
-      --gm-border:      #ced4da;
-      --gm-btn-bg:      #e9ecef;
-      --gm-btn-text:    #212529;
-      --gm-input-bg:    #ffffff;
+      --gm-bg:              #ffffff;
+      --gm-surface:         #f8f9fa;
+      --gm-text:            #212529;
+      --gm-border:          #ced4da;
+      --gm-btn-bg:          #e9ecef;
+      --gm-btn-text:        #212529;
+      --gm-input-bg:        #ffffff;
+      --gm-active-btn-bg:      rgba(0,0,0,0.8);
+      --gm-active-btn-text:    #ffffff;
+      --gm-secondary-btn-bg:   rgba(0,0,0,0.25);
+      --gm-secondary-btn-text: #212529;
     }
     [data-theme="dark"] {
-      --gm-bg:          #1e1e2e;
-      --gm-surface:     #2a2a3e;
-      --gm-text:        #cdd6f4;
-      --gm-border:      #585b70;
-      --gm-btn-bg:      #313244;
-      --gm-btn-text:    #cdd6f4;
-      --gm-input-bg:    #2a2a3e;
+      --gm-bg:                 #1e1e2e;
+      --gm-surface:            #2a2a3e;
+      --gm-text:               #cdd6f4;
+      --gm-border:             #585b70;
+      --gm-btn-bg:             #313244;
+      --gm-btn-text:           #cdd6f4;
+      --gm-input-bg:           #2a2a3e;
+      --gm-active-btn-bg:      rgba(205,214,244,0.9);
+      --gm-active-btn-text:    #1e1e2e;
+      --gm-secondary-btn-bg:   rgba(205,214,244,0.3);
+      --gm-secondary-btn-text: #cdd6f4;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -78,6 +86,42 @@
       gap: 4px;
     }
 
+    #scale-mode-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    #scale-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    #relative-keys {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-left: 8px;
+      padding-top: 34px;
+    }
+
+    .rel-key-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 30px;
+    }
+
+    .rel-key-label {
+      white-space: nowrap;
+      width: 110px;
+    }
+
+    .rel-key-value {
+      font-weight: bold;
+    }
+
     .control-row {
       display: flex;
       align-items: center;
@@ -91,11 +135,51 @@
 
     .string-input { width: 100px; }
 
-    /* ── Chord buttons ── */
+    /* ── Chord buttons + transitions ── */
+    #chord-area {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
     #chord-buttons {
       display: flex;
       flex-direction: column;
       gap: 4px;
+    }
+
+    #chord-transitions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .trans-label {
+      width: 140px;
+      text-align: right;
+      font-size: 11px;
+      flex-shrink: 0;
+      padding-right: 8px;
+      opacity: 0.7;
+    }
+
+    .trans-btn {
+      min-width: 52px;
+      height: 28px;
+      font-size: 11px;
+      padding: 0 8px;
+      white-space: nowrap;
+      background-color: var(--gm-btn-bg);
+      color: var(--gm-btn-text);
+      border: 1px solid var(--gm-border);
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .trans-btn:hover { filter: brightness(0.93); }
+    .trans-btn.active {
+      background-color: var(--gm-active-btn-bg);
+      color: var(--gm-active-btn-text);
+      border-color: transparent;
     }
 
     .chord-row {
@@ -120,6 +204,16 @@
       padding: 0;
       white-space: nowrap;
       overflow: hidden;
+    }
+    .chord-btn.active {
+      background-color: var(--gm-active-btn-bg);
+      color: var(--gm-active-btn-text);
+      border-color: transparent;
+    }
+    .chord-btn.secondary {
+      background-color: var(--gm-secondary-btn-bg);
+      color: var(--gm-secondary-btn-text);
+      border-color: transparent;
     }
 
     /* ── Fretboard ── */
@@ -177,22 +271,54 @@
     <div id="string-inputs"></div>
   </div>
 
-  <!-- Right: scale/mode dropdowns, then chord buttons below -->
+  <!-- Right: scale/mode dropdowns + relative key display, then chord buttons below -->
   <div id="right-panel">
-    <div class="control-row">
-      <label>Tonic</label>
-      <select id="tonic" style="width:120px"></select>
-    </div>
-    <div class="control-row">
-      <label>Scale</label>
-      <select id="scale" style="width:300px"></select>
-    </div>
-    <div class="control-row">
-      <label>Mode</label>
-      <select id="mode" style="width:300px"></select>
+    <div id="scale-mode-row">
+      <div id="scale-controls">
+        <div class="control-row">
+          <label>Tonic</label>
+          <select id="tonic" style="width:120px"></select>
+        </div>
+        <div class="control-row">
+          <label>Scale</label>
+          <select id="scale" style="width:300px"></select>
+        </div>
+        <div class="control-row">
+          <label>Mode</label>
+          <select id="mode" style="width:300px"></select>
+        </div>
+      </div>
+      <div id="relative-keys">
+        <div class="rel-key-row">
+          <span class="rel-key-label">Relative major</span>
+          <span id="rel-major-value" class="rel-key-value"></span>
+        </div>
+        <div class="rel-key-row">
+          <span class="rel-key-label">Relative minor</span>
+          <span id="rel-minor-value" class="rel-key-value"></span>
+        </div>
+      </div>
     </div>
     <div style="height:8px"></div>
-    <div id="chord-buttons"></div>
+    <div id="chord-area">
+      <div id="chord-buttons"></div>
+      <div id="chord-transitions" style="display:none">
+        <div class="chord-row">
+          <span class="trans-label">Secondary dominant</span>
+          <button class="trans-btn" id="trans-sec-dom"></button>
+        </div>
+        <div class="chord-row">
+          <span class="trans-label">Chromatic mediant (m3)</span>
+          <button class="trans-btn" id="trans-med-up-m3"></button>
+          <button class="trans-btn" id="trans-med-dn-m3"></button>
+        </div>
+        <div class="chord-row">
+          <span class="trans-label">Chromatic mediant (M3)</span>
+          <button class="trans-btn" id="trans-med-up-M3"></button>
+          <button class="trans-btn" id="trans-med-dn-M3"></button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

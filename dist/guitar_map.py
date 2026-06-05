@@ -248,9 +248,30 @@ SHARP_TO_FLAT = {'A#': 'Bb', 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab'}
 _FLAT_TONIC_NAMES = {'F', 'A#', 'D#', 'G#', 'C#'}
 
 
-def should_use_flats(tonic):
-    """Return True when the key rooted on `tonic` is conventionally notated with flats."""
-    return re.match(r"[A-G](#|b)?", tonic).group() in _FLAT_TONIC_NAMES
+def parent_scale_root(tonic, scale, mode):
+    """Return the parent scale's root note given the mode's tonic."""
+    intervals = [int(i) for i in scale]
+    n = mode % len(intervals)
+    offset = sum(intervals[:n])
+    return transpose_note(tonic + "2", -offset)
+
+
+def should_use_flats(tonic, scale, mode):
+    """Return True when the key rooted on `tonic` (mode root) uses flat notation."""
+    root = re.match(r"[A-G](#|b)?", parent_scale_root(tonic, scale, mode)).group()
+    return root in _FLAT_TONIC_NAMES
+
+
+def build_scale_notes(tonic, scale, mode):
+    """Build the notes of the scale starting from the mode's tonic."""
+    intervals = [int(i) for i in scale]
+    n = mode % len(intervals)
+    current = parent_scale_root(tonic, scale, mode)
+    notes = [current]
+    for interval in scale[:-1]:
+        current = transpose_note(current, int(interval))
+        notes.append(current)
+    return notes[n:] + notes[:n]
 
 
 def enharmonic(note, use_flats):
@@ -679,15 +700,9 @@ if __name__ == "__main__":
         if tonic is None or scale is None or mode is None:
             return [dash.no_update] * (7 * len(chord_intervals.keys()) * 3 + 7)
         style = {"height": 30, "width": 55, "display": "block"}
-        current_note = tonic + "0"
-        notes_in_scale = [current_note]
-        for interval in scale[:-1]:
-            current_note = transpose_note(current_note, int(interval))
-            notes_in_scale.append(current_note)
-        n = mode % len(notes_in_scale)
-        notes_in_scale = notes_in_scale[n:] + notes_in_scale[:n]
+        notes_in_scale = build_scale_notes(tonic, scale, mode)
         num_notes_in_scale = len(notes_in_scale)
-        use_flats = should_use_flats(tonic)
+        use_flats = should_use_flats(tonic, scale, mode)
         button_labels = [
             f"{note_name(notes_in_scale[i], use_flats)}{chord}" if i < num_notes_in_scale else chord
             for i in range(7) for chord in chord_intervals.keys()
@@ -881,16 +896,10 @@ if __name__ == "__main__":
         if tonic is None or scale is None or mode is None:
             return dash.no_update
 
-        current_note = tonic + "0"
-        notes_in_scale = [current_note]
-        for interval in scale[:-1]:
-            current_note = transpose_note(current_note, int(interval))
-            notes_in_scale.append(current_note)
-        n = mode % len(notes_in_scale)
-        notes_in_scale = notes_in_scale[n:] + notes_in_scale[:n]
+        notes_in_scale = build_scale_notes(tonic, scale, mode)
         root = notes_in_scale[0]
 
-        use_flats = should_use_flats(tonic)
+        use_flats = should_use_flats(tonic, scale, mode)
 
         string_labels_local = [validate_note(note) for note in string_labels_local]
 

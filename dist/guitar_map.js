@@ -108,36 +108,122 @@ const TONIC_OPTIONS = [
 ];
 
 const CHORD_INTERVALS = {
-  maj:  [0,4,7],
-  min:  [0,3,7],
-  dim:  [0,3,6],
-  aug:  [0,4,8],
-  sus2: [0,2,7],
-  sus4: [0,5,7],
-  '7':  [0,4,7,10],
-  maj7: [0,4,7,11],
-  min7: [0,3,7,10],
-  dim7: [0,3,6,9],
-  add9: [0,4,7,14],
+  // Triads
+  maj:    [0,4,7],
+  min:    [0,3,7],
+  dim:    [0,3,6],
+  aug:    [0,4,8],
+  // Suspended triads
+  sus2:   [0,2,7],
+  sus4:   [0,5,7],
+  // Sixths
+  '6':    [0,4,7,9],
+  min6:   [0,3,7,9],
+  // Sevenths
+  '7':    [0,4,7,10],
+  maj7:   [0,4,7,11],
+  min7:   [0,3,7,10],
+  mMaj7:  [0,3,7,11],
+  dim7:   [0,3,6,9],
+  m7b5:   [0,3,6,10],
+  aug7:   [0,4,8,10],
+  '7sus4':[0,5,7,10],
+  // Add9 (no 7th)
+  add9:   [0,4,7,14],
+  madd9:  [0,3,7,14],
+  // Ninths (with 7th)
+  '9':    [0,4,7,10,14],
+  maj9:   [0,4,7,11,14],
+  min9:   [0,3,7,10,14],
+  // Add11 (no 7th/9th)
+  add11:  [0,4,7,17],
+  madd11: [0,3,7,17],
+  // Elevenths (with 7th and 9th)
+  '11':   [0,4,7,10,14,17],
+  maj11:  [0,4,7,11,14,17],
+  min11:  [0,3,7,10,14,17],
+  // Thirteenths
+  '13':   [0,4,7,10,14,17,21],
+  maj13:  [0,4,7,11,14,17,21],
+  min13:  [0,3,7,10,14,17,21],
 };
 
 const CHORD_INTERVAL_LABELS = {
-  maj:  ['R','3','5'],
-  min:  ['R','m3','5'],
-  dim:  ['R','m3','b5'],
-  aug:  ['R','3','A5'],
-  sus2: ['R','2','5'],
-  sus4: ['R','4','5'],
-  '7':  ['R','3','5','m7'],
-  maj7: ['R','3','5','7'],
-  min7: ['R','m3','5','m7'],
-  dim7: ['R','m3','b5','bb7'],
-  add9: ['R','3','5','9'],
+  maj:    ['R','3','5'],
+  min:    ['R','m3','5'],
+  dim:    ['R','m3','b5'],
+  aug:    ['R','3','A5'],
+  sus2:   ['R','2','5'],
+  sus4:   ['R','4','5'],
+  '6':    ['R','3','5','6'],
+  min6:   ['R','m3','5','6'],
+  '7':    ['R','3','5','m7'],
+  maj7:   ['R','3','5','7'],
+  min7:   ['R','m3','5','m7'],
+  mMaj7:  ['R','m3','5','7'],
+  dim7:   ['R','m3','b5','bb7'],
+  m7b5:   ['R','m3','b5','m7'],
+  aug7:   ['R','3','A5','m7'],
+  '7sus4':['R','4','5','m7'],
+  add9:   ['R','3','5','9'],
+  madd9:  ['R','m3','5','9'],
+  '9':    ['R','3','5','m7','9'],
+  maj9:   ['R','3','5','7','9'],
+  min9:   ['R','m3','5','m7','9'],
+  add11:  ['R','3','5','11'],
+  madd11: ['R','m3','5','11'],
+  '11':   ['R','3','5','m7','9','11'],
+  maj11:  ['R','3','5','7','9','11'],
+  min11:  ['R','m3','5','m7','9','11'],
+  '13':   ['R','3','5','m7','9','11','13'],
+  maj13:  ['R','3','5','7','9','11','13'],
+  min13:  ['R','m3','5','m7','9','11','13'],
 };
 
-const CHORD_TYPES = ['maj','min','dim','aug','sus2','sus4','7','maj7','min7','dim7','add9'];
+const SCALE_QUALITY = {
+  '2212221':  'major',  // diatonic
+  '2122131':  'minor',  // harmonic minor
+  '2122221':  'minor',  // melodic minor
+  '2131131':  'minor',  // hungarian minor
+  '22323':    'major',  // pentatonic
+  '211323':   'major',  // blues
+  '313131':   null,     // augmented (symmetric, no relative key)
+  '21212121': null,     // diminished (symmetric, no relative key)
+};
+
+const CHORD_TYPES = [
+  'maj','min','dim','aug',
+  'sus2','sus4',
+  '6','min6',
+  '7','maj7','min7','mMaj7','dim7','m7b5','aug7','7sus4',
+  'add9','madd9',
+  '9','maj9','min9',
+  'add11','madd11',
+  '11','maj11','min11',
+  '13','maj13','min13',
+];
 const CHORD_ROMAN = ['I','II','III','IV','V','VI','VII'];
 const DEFAULT_STRING_LABELS = ['G#0','C#1','E1','B1','E2','A2','D3','G3','B3','E4'];
+
+const MINOR_QUALITY_TYPES = new Set([
+  'min','min6','min7','mMaj7','m7b5','min9','min11','min13','madd9','madd11',
+]);
+
+function romanNumeral(index, chordType) {
+  const base = CHORD_ROMAN[index];
+  const lower = base.toLowerCase();
+  switch (chordType) {
+    case 'dim':   return lower + '°';
+    case 'dim7':  return lower + '°';
+    case 'm7b5':  return lower + 'ø';
+    case 'aug':   return base + '+';
+    case 'aug7':  return base + '+';
+    case 'sus2':  return base + 'sus2';
+    case 'sus4':  return base + 'sus4';
+    case '7sus4': return base + '7sus4';
+    default:      return MINOR_QUALITY_TYPES.has(chordType) ? lower : base;
+  }
+}
 
 // ── Music theory ──────────────────────────────────────────────────────────────
 
@@ -191,8 +277,17 @@ function isOctaveOfNote(note, comparison) {
          validateNote(comparison).match(/^[A-G](#|b)?/)[0];
 }
 
-function shouldUseFlats(tonic) {
-  return FLAT_TONIC_NAMES.has(tonic.match(/^[A-G](#|b)?/)[0]);
+function parentScaleRoot(tonic, scalePattern, mode) {
+  const intervals = scalePattern.split('').map(Number);
+  const n = mode % intervals.length;
+  const offset = intervals.slice(0, n).reduce((a, b) => a + b, 0);
+  // Use octave 2 so subtracting up to 11 semitones never goes below C0
+  return transposeNote(tonic + '2', -offset);
+}
+
+function shouldUseFlats(tonic, scalePattern, mode) {
+  const root = parentScaleRoot(tonic, scalePattern, mode).match(/^[A-G](#|b)?/)[0];
+  return FLAT_TONIC_NAMES.has(root);
 }
 
 function enharmonic(note, useFlats) {
@@ -212,13 +307,14 @@ function displayNote(note) {
 }
 
 function buildScaleNotes(tonic, scalePattern, mode) {
-  let current = tonic + '0';
+  const intervals = scalePattern.split('').map(Number);
+  const n = mode % intervals.length;
+  let current = parentScaleRoot(tonic, scalePattern, mode);
   const notes = [current];
-  for (const ch of scalePattern.slice(0, -1)) {
-    current = transposeNote(current, parseInt(ch));
+  for (let i = 0; i < intervals.length - 1; i++) {
+    current = transposeNote(current, intervals[i]);
     notes.push(current);
   }
-  const n = mode % notes.length;
   return [...notes.slice(n), ...notes.slice(0, n)];
 }
 
@@ -251,6 +347,7 @@ const state = {
   mode:  saved?.mode  ?? 0,
   theme: saved?.theme ?? 'light',
   activeChord: null,
+  transitionChord: null,
 };
 
 // Clamp saved mode to valid values for the saved scale
@@ -263,6 +360,34 @@ const state = {
 
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
+}
+
+// ── Relative keys ─────────────────────────────────────────────────────────────
+
+function renderRelativeKeys() {
+  const quality = SCALE_QUALITY[state.scale];
+  const parentRoot = parentScaleRoot(state.tonic, state.scale, state.mode);
+
+  if (quality === null) {
+    document.getElementById('rel-major-value').textContent = '—';
+    document.getElementById('rel-minor-value').textContent = '—';
+    return;
+  }
+
+  // For major-quality scales mode 1 is the major root; minor is 9 semitones up.
+  // For minor-quality scales mode 1 is the minor root; major is 3 semitones up.
+  const majRoot = quality === 'major' ? parentRoot : transposeNote(parentRoot, 3);
+  const minRoot = quality === 'major' ? transposeNote(parentRoot, 9) : parentRoot;
+
+  const majRootName = majRoot.match(/^[A-G](#|b)?/)[0];
+  const useFlats = FLAT_TONIC_NAMES.has(majRootName);
+
+  const majDisplay = useFlats ? (SHARP_TO_FLAT[majRootName] || majRootName) : majRootName;
+  const minRootName = minRoot.match(/^[A-G](#|b)?/)[0];
+  const minDisplay = useFlats ? (SHARP_TO_FLAT[minRootName] || minRootName) : minRootName;
+
+  document.getElementById('rel-major-value').textContent = displayNote(majDisplay) + ' major';
+  document.getElementById('rel-minor-value').textContent = displayNote(minDisplay) + ' minor';
 }
 
 // ── Mode dropdown ─────────────────────────────────────────────────────────────
@@ -293,12 +418,85 @@ function renderStringVisibility() {
 
 // ── Chord buttons ─────────────────────────────────────────────────────────────
 
-function renderChordButtons() {
+function renderTransitions() {
+  const panel = document.getElementById('chord-transitions');
+  if (!state.activeChord) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  const [rowStr, chordType] = state.activeChord.split('-');
+  const rowIdx = parseInt(rowStr) - 1;
   const notesInScale = buildScaleNotes(state.tonic, state.scale, state.mode);
-  const useFlats = shouldUseFlats(state.tonic);
+  const useFlats = shouldUseFlats(state.tonic, state.scale, state.mode);
+  const rootNote = notesInScale[rowIdx];
+
+  // Secondary dominant: the dominant 7th whose root is a P5 above the selected root
+  document.getElementById('trans-sec-dom').textContent =
+    displayNote(noteName(transposeNote(rootNote, 7), useFlats)) + '7';
+
+  // Chromatic mediants: same basic quality as the selected chord
+  const isMinor = MINOR_QUALITY_TYPES.has(chordType) || chordType === 'dim' || chordType === 'dim7';
+  const q = isMinor ? 'min' : '';
+
+  document.getElementById('trans-med-up-m3').textContent =
+    '↑ ' + displayNote(noteName(transposeNote(rootNote, 3), useFlats)) + q;
+  document.getElementById('trans-med-dn-m3').textContent =
+    '↓ ' + displayNote(noteName(transposeNote(rootNote, 9), useFlats)) + q;
+  document.getElementById('trans-med-up-M3').textContent =
+    '↑ ' + displayNote(noteName(transposeNote(rootNote, 4), useFlats)) + q;
+  document.getElementById('trans-med-dn-M3').textContent =
+    '↓ ' + displayNote(noteName(transposeNote(rootNote, 8), useFlats)) + q;
+
+  panel.style.display = '';
+}
+
+const TRANSITION_IDS = ['trans-sec-dom','trans-med-up-m3','trans-med-dn-m3','trans-med-up-M3','trans-med-dn-M3'];
+
+function updateActiveChordButton() {
+  for (let i = 0; i < 7; i++) {
+    for (let j = 0; j < CHORD_TYPES.length; j++) {
+      const btn = document.getElementById(`chord-btn-${i}-${j}`);
+      if (!btn) continue;
+      const isActive = state.activeChord === `${i+1}-${CHORD_TYPES[j]}`;
+      btn.classList.toggle('active',    isActive && !state.transitionChord);
+      btn.classList.toggle('secondary', isActive && !!state.transitionChord);
+    }
+  }
+}
+
+function updateTransitionButtons() {
+  for (const id of TRANSITION_IDS) {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('active', !!(state.transitionChord && state.transitionChord.badgeId === id));
+  }
+}
+
+function activateTransitionChord(badgeId, semitoneOffset, forcedType) {
+  if (!state.activeChord) return;
+  if (state.transitionChord && state.transitionChord.badgeId === badgeId) {
+    state.transitionChord = null;
+  } else {
+    const [rowStr, chordType] = state.activeChord.split('-');
+    const rootNote = transposeNote(buildScaleNotes(state.tonic, state.scale, state.mode)[parseInt(rowStr) - 1], semitoneOffset);
+    const type = forcedType !== null
+      ? forcedType
+      : (MINOR_QUALITY_TYPES.has(chordType) || chordType === 'dim' || chordType === 'dim7' ? 'min' : 'maj');
+    state.transitionChord = { badgeId, rootNote, intervals: CHORD_INTERVALS[type], labels: CHORD_INTERVAL_LABELS[type] };
+  }
+  updateTransitionButtons();
+  updateActiveChordButton();
+  renderFretboard();
+}
+
+function renderChordButtons() {
+  renderRelativeKeys();
+  const notesInScale = buildScaleNotes(state.tonic, state.scale, state.mode);
+  const useFlats = shouldUseFlats(state.tonic, state.scale, state.mode);
 
   for (let i = 0; i < 7; i++) {
     let rowVisible = false;
+    let firstChordType = null;
 
     for (let j = 0; j < CHORD_TYPES.length; j++) {
       const chordType = CHORD_TYPES[j];
@@ -313,13 +511,19 @@ function renderChordButtons() {
       if (inScale) {
         document.getElementById(`chord-btn-${i}-${j}`).textContent =
           displayNote(noteName(notesInScale[i], useFlats)) + chordType;
+        if (firstChordType === null) firstChordType = chordType;
         rowVisible = true;
       }
     }
 
     const row = document.getElementById(`chord-row-${i}`);
     row.style.display = rowVisible ? '' : 'none';
+    document.getElementById(`chord-label-${i}`).textContent =
+      firstChordType ? romanNumeral(i, firstChordType) : CHORD_ROMAN[i];
   }
+  updateActiveChordButton();
+  updateTransitionButtons();
+  renderTransitions();
 }
 
 // ── Fretboard (Plotly.js) ─────────────────────────────────────────────────────
@@ -334,10 +538,13 @@ function buildFretboardData() {
 
   const notesInScale = buildScaleNotes(state.tonic, state.scale, state.mode);
   const root = notesInScale[0];
-  const useFlats = shouldUseFlats(state.tonic);
+  const useFlats = shouldUseFlats(state.tonic, state.scale, state.mode);
 
   let notesInChord = [], chordLabels = [];
-  if (state.activeChord) {
+  if (state.transitionChord) {
+    notesInChord = state.transitionChord.intervals.map(iv => transposeNote(state.transitionChord.rootNote, iv));
+    chordLabels = state.transitionChord.labels;
+  } else if (state.activeChord) {
     const [rowStr, chordType] = state.activeChord.split('-');
     const rowIdx = parseInt(rowStr) - 1;
     notesInChord = CHORD_INTERVALS[chordType].map(iv => transposeNote(notesInScale[rowIdx], iv));
@@ -435,8 +642,9 @@ function addNoteMarker(traces, x, y, note, root, notesInScale, notesInChord, cho
   for (const sn of notesInScale.slice(1)) {
     if (isOctaveOfNote(note, sn)) { color = color ?? tc.scale_fill; }
   }
-  if (!color) return;
 
+  // Chord check must run before the early-return so non-scale chord tones
+  // (e.g. chromatic mediant / secondary dominant notes) still get a marker.
   let chordLabel = null;
   for (let j = 0; j < notesInChord.length; j++) {
     if (isOctaveOfNote(notesInChord[j], note)) {
@@ -445,6 +653,8 @@ function addNoteMarker(traces, x, y, note, root, notesInScale, notesInChord, cho
       break;
     }
   }
+
+  if (!color) return;
 
   const marker = { color, size:20, line:{ color:tc.marker_border, width:2 } };
   if (chordLabel) {
@@ -530,7 +740,7 @@ function buildChordButtonGrid() {
 
     const label = document.createElement('span');
     label.className = 'chord-row-label';
-    label.textContent = CHORD_ROMAN[i];
+    label.id = `chord-label-${i}`;
     row.appendChild(label);
 
     for (let j = 0; j < CHORD_TYPES.length; j++) {
@@ -542,7 +752,11 @@ function buildChordButtonGrid() {
       btn.className = 'chord-btn';
       const chordKey = `${i+1}-${CHORD_TYPES[j]}`;
       btn.addEventListener('click', () => {
-        state.activeChord = state.activeChord === chordKey ? null : chordKey;
+        state.activeChord     = state.activeChord === chordKey ? null : chordKey;
+        state.transitionChord = null;
+        updateActiveChordButton();
+        updateTransitionButtons();
+        renderTransitions();
         renderFretboard();
       });
 
@@ -626,6 +840,18 @@ function init() {
   applyTheme();
   buildStringInputs();
   buildChordButtonGrid();
+
+  // Transition button click handlers
+  for (const [id, offset, type] of [
+    ['trans-sec-dom',    7, '7'  ],
+    ['trans-med-up-m3',  3, null ],
+    ['trans-med-dn-m3',  9, null ],
+    ['trans-med-up-M3',  4, null ],
+    ['trans-med-dn-M3',  8, null ],
+  ]) {
+    document.getElementById(id).addEventListener('click', () => activateTransitionChord(id, offset, type));
+  }
+
   renderModeDropdown();
   renderStringVisibility();
   renderChordButtons();
@@ -634,7 +860,8 @@ function init() {
   // Controls
   numStrSel.addEventListener('change', () => {
     state.numStrings = parseInt(numStrSel.value);
-    state.activeChord = null;
+    state.activeChord     = null;
+    state.transitionChord = null;
     persistState();
     renderStringVisibility();
     renderChordButtons();
@@ -643,7 +870,8 @@ function init() {
 
   tonicSel.addEventListener('change', () => {
     state.tonic = tonicSel.value;
-    state.activeChord = null;
+    state.activeChord     = null;
+    state.transitionChord = null;
     persistState();
     renderChordButtons();
     renderFretboard();
@@ -652,7 +880,8 @@ function init() {
   scaleSel.addEventListener('change', () => {
     state.scale = scaleSel.value;
     state.mode = MODES[state.scale][0].value;
-    state.activeChord = null;
+    state.activeChord     = null;
+    state.transitionChord = null;
     persistState();
     renderModeDropdown();
     renderChordButtons();
@@ -661,7 +890,8 @@ function init() {
 
   document.getElementById('mode').addEventListener('change', e => {
     state.mode = parseInt(e.target.value);
-    state.activeChord = null;
+    state.activeChord     = null;
+    state.transitionChord = null;
     persistState();
     renderChordButtons();
     renderFretboard();
