@@ -241,6 +241,35 @@ def is_octave_of_note(note, comparison):
     return note == comparison
 
 
+SHARP_TO_FLAT = {'A#': 'Bb', 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab'}
+
+# Tonic names (stored internally as sharps) whose key conventionally uses flat notation.
+# F is included because F major contains Bb.
+_FLAT_TONIC_NAMES = {'F', 'A#', 'D#', 'G#', 'C#'}
+
+
+def should_use_flats(tonic):
+    """Return True when the key rooted on `tonic` is conventionally notated with flats."""
+    return re.match(r"[A-G](#|b)?", tonic).group() in _FLAT_TONIC_NAMES
+
+
+def enharmonic(note, use_flats):
+    """Return `note` with its accidental respelled as a flat when `use_flats` is True.
+
+    Preserves the octave suffix (e.g. 'A#2' -> 'Bb2').
+    """
+    if not use_flats:
+        return note
+    name = re.match(r"[A-G]#?", note).group()
+    rest = note[len(name):]
+    return SHARP_TO_FLAT.get(name, name) + rest
+
+
+def note_name(note, use_flats=False):
+    """Return just the letter+accidental portion of `note`, enharmonically respelled."""
+    return re.match(r"[A-G](#|b)?", enharmonic(note, use_flats)).group()
+
+
 if __name__ == "__main__":
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
     app.title = "Guitar Map"
@@ -658,8 +687,9 @@ if __name__ == "__main__":
         n = mode % len(notes_in_scale)
         notes_in_scale = notes_in_scale[n:] + notes_in_scale[:n]
         num_notes_in_scale = len(notes_in_scale)
+        use_flats = should_use_flats(tonic)
         button_labels = [
-            f"{notes_in_scale[i][:-1]}{chord}" if i < num_notes_in_scale else chord
+            f"{note_name(notes_in_scale[i], use_flats)}{chord}" if i < num_notes_in_scale else chord
             for i in range(7) for chord in chord_intervals.keys()
         ]
         num_chords_in_scale = []
@@ -860,6 +890,8 @@ if __name__ == "__main__":
         notes_in_scale = notes_in_scale[n:] + notes_in_scale[:n]
         root = notes_in_scale[0]
 
+        use_flats = should_use_flats(tonic)
+
         string_labels_local = [validate_note(note) for note in string_labels_local]
 
         fig = go.Figure()
@@ -914,7 +946,7 @@ if __name__ == "__main__":
             fig.add_annotation(
                 xref="paper", x=0, xanchor="right",
                 yref="y",      y=y_pos,
-                text=note,
+                text=enharmonic(note, use_flats),
                 showarrow=False,
                 font=dict(color=tc['annotation']),
             )
@@ -930,7 +962,7 @@ if __name__ == "__main__":
         for y_pos, base_note in zip(string_positions, string_labels_local):
             fig.add_trace(go.Scatter(
                 x=[0.0], y=[y_pos], mode="markers",
-                hovertemplate=f"{base_note} ({note_to_frequency(base_note)}Hz)<extra></extra>",
+                hovertemplate=f"{enharmonic(base_note, use_flats)} ({note_to_frequency(base_note)}Hz)<extra></extra>",
                 marker=dict(size=1, color=tc['line']),
             ))
 
@@ -969,7 +1001,7 @@ if __name__ == "__main__":
                 note = transpose_note(base_note, i + 1)
                 fig.add_trace(go.Scatter(
                     x=[fret_positions[i]], y=[y_pos], mode="markers",
-                    hovertemplate=f"{note} ({note_to_frequency(note)}Hz)<extra></extra>",
+                    hovertemplate=f"{enharmonic(note, use_flats)} ({note_to_frequency(note)}Hz)<extra></extra>",
                     marker=dict(size=1, color=tc['line']),
                 ))
                 in_scale = False

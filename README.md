@@ -22,9 +22,8 @@ The diagram below shows an 8-string guitar in drop-E tuning, diatonic scale, Aeo
 
 ## Known limitations
 
-* Chord voicings are displayed for all positions across the neck without filtering by playability (hand span, fretting difficulty, or string-skip constraints).
-* There is no audio playback or MIDI export.
-* Enharmonic equivalents are not disambiguated — notes are always displayed in their sharp form (e.g. F# rather than Gb).
+* Chord voicings are displayed for all positions across the neck without filtering by playability (hand span, fretting difficulty, or string-skip constraints). It is up to the player to use the highlighted positions to form practical chord shapes or arpeggios.
+* There is currently no audio playback or MIDI export, but this is planned for a future release.
 
 ## Installation
 
@@ -64,6 +63,30 @@ rm ~/.local/share/icons/hicolor/256x256/apps/guitar-map.png
 update-desktop-database ~/.local/share/applications
 ```
 
+##### Building the AppImage locally
+
+If you prefer to build from source rather than downloading a prebuilt binary, you will need [Node.js](https://nodejs.org/) (v18+), [uv](https://docs.astral.sh/uv/), and `libfuse2` installed.
+
+```bash
+# Install Node.js v22 LTS via NodeSource
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install uv (used by the prebuild step to create the PyInstaller bundle)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install libfuse2 (required by the AppImage runtime)
+sudo apt-get install libfuse2
+
+git clone https://github.com/kwehage/guitar-map
+cd guitar-map
+npm install
+npm run prebuild   # bundles the Python app with PyInstaller
+npm run make       # produces the AppImage under out/make/
+```
+
+The AppImage will be written to `out/make/appimage/x64/guitar-map-*.AppImage`.
+
 #### macOS
 
 * Download the `.dmg` from the releases page.
@@ -87,26 +110,22 @@ See [this guide](https://osxdaily.com/2019/02/13/fix-app-damaged-cant-be-opened-
 
 `guitar_map` is a Python application built on [Dash](https://pypi.org/project/dash/) and [dash-bootstrap-components](https://pypi.org/project/dash-bootstrap-components/). Running from source starts a local web server at `http://127.0.0.1:8050`; open that URL in any browser to use the application.
 
-#### Install dependencies
+[uv](https://docs.astral.sh/uv/) is the recommended way to manage the Python environment, as it pins Python 3.13 automatically without requiring a matching system Python.
+
+#### Install uv
 
 ```bash
-pip install dash dash-bootstrap-components
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Or in a virtual environment:
+#### Clone and run
 
 ```bash
 git clone https://github.com/kwehage/guitar-map
 cd guitar-map
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-#### Run
-
-```bash
-python dist/guitar_map.py
+uv venv --python 3.13 .venv
+uv pip install --python .venv/bin/python -r requirements.txt
+.venv/bin/python dist/guitar_map.py   # Windows: .venv\Scripts\python.exe dist\guitar_map.py
 ```
 
 Then open `http://127.0.0.1:8050` in your browser.
