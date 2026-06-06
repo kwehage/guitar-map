@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Guitar Map</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <meta name="theme-color" content="#212529">
   <script src="plotly.min.js"></script>
   <style>
     :root {
@@ -71,6 +74,7 @@
       gap: 24px;
       padding: 10px;
       align-items: flex-start;
+      position: relative;
     }
 
     #right-panel {
@@ -237,6 +241,22 @@
       background-color: var(--gm-secondary-btn-bg);
       color: var(--gm-secondary-btn-text);
       border-color: transparent;
+    }
+
+    /* ── Settings gear button ── */
+    #settings-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      font-size: 18px;
+      padding: 0;
+      line-height: 1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* ── Circle of Fifths ── */
@@ -425,6 +445,7 @@
   <div id="cof-container">
     <div id="circle-of-fifths"></div>
   </div>
+  <button id="settings-btn" title="Settings">⚙</button>
 </div>
 
 <div id="fretboard"></div>
@@ -456,5 +477,10 @@
 <button id="open-preferences-btn" style="display:none"></button>
 
 <script src="guitar_map.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+</script>
 </body>
 </html>

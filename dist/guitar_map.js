@@ -1969,9 +1969,10 @@ function init() {
     renderCircleOfFifths();
   });
 
-  // Preferences modal
-  document.getElementById('open-preferences-btn').addEventListener('click', () =>
-    document.getElementById('preferences-modal').classList.remove('hidden'));
+  // Preferences modal — opened by the Electron menu (hidden btn) or the visible gear button
+  const openPreferences = () => document.getElementById('preferences-modal').classList.remove('hidden');
+  document.getElementById('open-preferences-btn').addEventListener('click', openPreferences);
+  document.getElementById('settings-btn').addEventListener('click', openPreferences);
   document.getElementById('close-preferences-btn').addEventListener('click', () =>
     document.getElementById('preferences-modal').classList.add('hidden'));
   document.getElementById('preferences-modal').addEventListener('click', e => {
