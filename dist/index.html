@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="light">
+<html data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,6 +85,18 @@
       align-items: start;
     }
 
+    /* On narrow screens (tablets in portrait, small laptops) the COF and
+       tonic-alterations columns wrap below the main controls. */
+    @media (max-width: 900px) {
+      #controls {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "scale"
+          "buttons"
+          "cof";
+      }
+    }
+
     #scale-controls {
       grid-area: scale;
       display: flex;
@@ -99,13 +111,15 @@
     #chord-buttons-area {
       grid-area: buttons;
       display: flex;
-      gap: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
       align-items: flex-start;
     }
 
     #chord-info-row {
       display: flex;
-      gap: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
       padding: 0 10px 10px 10px;
       align-items: flex-start;
     }
@@ -174,9 +188,9 @@
     }
 
     .trans-btn {
-      min-width: 102px;
+      min-width: 92px;
       height: 30px;
-      font-size: 13px;
+      font-size: 12px;
       padding: 0 4px;
       white-space: nowrap;
       background-color: var(--gm-btn-bg);
@@ -214,9 +228,9 @@
     }
 
     .chord-btn {
-      width: 102px;
+      width: 92px;
       height: 30px;
-      font-size: 13px;
+      font-size: 12px;
       padding: 0 4px;
       white-space: nowrap;
     }

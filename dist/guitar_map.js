@@ -561,7 +561,7 @@ const state = {
   tonic: saved?.tonic ?? 'C',
   scale: saved?.scale ?? '2212221',
   mode:  saved?.mode  ?? 0,
-  theme: saved?.theme ?? 'light',
+  theme: saved?.theme ?? 'dark',
   midiDeviceId: saved?.midiDeviceId ?? null,
   midiOutputId: saved?.midiOutputId ?? null,
   activeChord: null,
