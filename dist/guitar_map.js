@@ -51,11 +51,13 @@ const THEMES = {
     bg: 'white', line: 'black',
     root_fill: 'rgba(0,0,0,0.8)', scale_fill: 'rgba(0,0,0,0.1)',
     base_fill: 'rgba(255,255,255,0.3)', annotation: 'black', label_fill: '#ffffff',
+    midi_fill: 'rgba(240,200,30,0.9)',
   },
   dark: {
     bg: '#1e1e2e', line: '#cdd6f4',
     root_fill: 'rgba(205,214,244,0.9)', scale_fill: 'rgba(205,214,244,0.15)',
     base_fill: 'rgba(0,0,0,0.3)', annotation: '#cdd6f4', label_fill: '#000000',
+    midi_fill: 'rgba(240,200,30,0.85)',
   },
 };
 
@@ -344,6 +346,13 @@ function noteToFrequency(note) {
   return Math.round(440 * Math.pow(2, d / 12) * 100) / 100;
 }
 
+function notePitchClass(note) {
+  const { name, accidental } = extractNoteAndOctave(validateNote(note));
+  let fullNote = name + accidental;
+  if (accidental === 'b') fullNote = NOTE_NAMES[(NOTE_NAMES.indexOf(name) - 1 + 12) % 12];
+  return NOTE_NAMES.indexOf(fullNote); // 0=C … 11=B, matches MIDI pitchClass = noteNumber % 12
+}
+
 function transposeNote(note, semitoneOffset) {
   note = validateNote(note);
   const { name, accidental, octave } = extractNoteAndOctave(note);
@@ -528,6 +537,7 @@ function persistState() {
   const s = {
     num_strings: state.numStrings,
     tonic: state.tonic, scale: state.scale, mode: state.mode, theme: state.theme,
+    midiDeviceId: state.midiDeviceId,
   };
   for (let i = 0; i < 10; i++) s[`string_${i + 1}`] = state.strings[i];
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
@@ -543,6 +553,7 @@ const state = {
   scale: saved?.scale ?? '2212221',
   mode:  saved?.mode  ?? 0,
   theme: saved?.theme ?? 'light',
+  midiDeviceId: saved?.midiDeviceId ?? null,
   activeChord: null,
   baseAltChord: null,
   transitionChord: null,
@@ -559,6 +570,89 @@ const state = {
 
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
+}
+
+// ── MIDI ──────────────────────────────────────────────────────────────────────
+
+let midiAccess = null;
+const midiActiveNotes = new Set(); // active MIDI note numbers (0–127)
+
+let _midiRenderPending = false;
+function scheduleMidiRender() {
+  if (_midiRenderPending) return;
+  _midiRenderPending = true;
+  requestAnimationFrame(() => { _midiRenderPending = false; renderFretboard(); });
+}
+
+function handleMidiMessage(event) {
+  const [status, note, velocity] = event.data;
+  const type = status & 0xF0;
+  if (type === 0x90 && velocity > 0) {
+    midiActiveNotes.add(note);
+  } else if (type === 0x80 || (type === 0x90 && velocity === 0)) {
+    midiActiveNotes.delete(note);
+  } else {
+    return;
+  }
+  scheduleMidiRender();
+}
+
+function setMidiDevice(deviceId) {
+  if (midiAccess) {
+    for (const inp of midiAccess.inputs.values()) inp.onmidimessage = null;
+  }
+  midiActiveNotes.clear();
+  state.midiDeviceId = deviceId || null;
+  persistState();
+  if (midiAccess && deviceId) {
+    const inp = midiAccess.inputs.get(deviceId);
+    if (inp) inp.onmidimessage = handleMidiMessage;
+  }
+  renderFretboard();
+}
+
+function populateMidiDevices() {
+  const sel = document.getElementById('midi-device-select');
+  if (!sel || !midiAccess) return;
+  const prev = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  for (const [id, inp] of midiAccess.inputs) {
+    const opt = document.createElement('option');
+    opt.value = id; opt.textContent = inp.name;
+    sel.appendChild(opt);
+  }
+  const ids = [...midiAccess.inputs.keys()];
+  sel.value = ids.includes(prev) ? prev : (ids.includes(state.midiDeviceId) ? state.midiDeviceId : '');
+}
+
+async function initMidi() {
+  if (!navigator.requestMIDIAccess) {
+    const el = document.getElementById('midi-status');
+    if (el) el.textContent = 'Web MIDI API not supported in this browser.';
+    return;
+  }
+  try {
+    midiAccess = await navigator.requestMIDIAccess();
+    const statusEl = document.getElementById('midi-status');
+    if (statusEl) statusEl.textContent = '';
+    populateMidiDevices();
+    if (state.midiDeviceId && midiAccess.inputs.has(state.midiDeviceId)) {
+      const inp = midiAccess.inputs.get(state.midiDeviceId);
+      if (inp) inp.onmidimessage = handleMidiMessage;
+      const sel = document.getElementById('midi-device-select');
+      if (sel) sel.value = state.midiDeviceId;
+    }
+    midiAccess.onstatechange = () => {
+      populateMidiDevices();
+      if (state.midiDeviceId && !midiAccess.inputs.has(state.midiDeviceId)) {
+        midiActiveNotes.clear();
+        scheduleMidiRender();
+      }
+    };
+  } catch (err) {
+    const el = document.getElementById('midi-status');
+    if (el) el.textContent = `MIDI access denied: ${err.message}`;
+  }
 }
 
 // ── Circle of Fifths ─────────────────────────────────────────────────────────
@@ -1358,6 +1452,30 @@ function buildFretboardData() {
     }
   }
 
+  // ── MIDI note highlights ──────────────────────────────────────────────────
+  if (midiActiveNotes.size > 0) {
+    const midiPCs = new Set([...midiActiveNotes].map(n => n % 12));
+    for (let si = 0; si < state.numStrings; si++) {
+      const baseNote = stringLabels[si];
+      const y = strPosRev[si];
+      const highlight = (x, note) => {
+        if (!midiPCs.has(notePitchClass(note))) return;
+        const inScale = notesInScale.some(sn => isOctaveOfNote(note, sn));
+        const inChord = notesInChord.some(cn => isOctaveOfNote(cn, note));
+        if (inScale || inChord) {
+          traces.push({ x:[x], y:[y], mode:'markers', hoverinfo:'skip', type:'scatter',
+            marker:{ symbol:'circle-open', color:tc.midi_fill, size:26,
+                     line:{ color:tc.midi_fill, width:3 } } });
+        } else {
+          traces.push({ x:[x], y:[y], mode:'markers', hoverinfo:'skip', type:'scatter',
+            marker:{ symbol:'circle', color:tc.midi_fill, size:20 } });
+        }
+      };
+      highlight(0, baseNote);
+      for (let fi = 0; fi < NUM_FRETS; fi++) highlight(fretPositions[fi], transposeNote(baseNote, fi + 1));
+    }
+  }
+
   const layout = {
     showlegend: false,
     plot_bgcolor: tc.bg, paper_bgcolor: tc.bg,
@@ -2123,6 +2241,16 @@ function init() {
     if (e.target === document.getElementById('preferences-modal'))
       document.getElementById('preferences-modal').classList.add('hidden');
   });
+
+  // MIDI device selector
+  document.getElementById('midi-device-select').addEventListener('change', e => {
+    setMidiDevice(e.target.value || null);
+    const sel = document.getElementById('midi-device-select');
+    if (sel) sel.value = state.midiDeviceId ?? '';
+  });
+
+  // Start MIDI access (async — populates device list when permission is granted)
+  initMidi();
 
   // File input for open (web / non-Electron path)
   document.getElementById('file-input').addEventListener('change', e => {
