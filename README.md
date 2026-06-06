@@ -13,16 +13,20 @@ From those inputs it displays:
 * A fretboard diagram with every position labelled — hover over any position to see the note name and frequency in Hz.
 * All notes in the scale highlighted with circles; the tonic of the current mode is shown in black.
 * All diatonic chord voicings for the scale; click a chord to highlight every matching position on the fretboard.
+* For each chord, common out-of-key transitions: secondary dominant, chromatic mediants (major and minor third up and down).
+* Borrowed chord suggestions from parallel modes of the same scale.
+* Tonic alteration chords: Neapolitan (♭II), ♭III, minor subdominant (iv), ♭VI, and subtonic (♭VII).
+* Relative major and minor keys for the current selection.
+* A **Circle of Fifths** diagram that highlights the active key and shows the standard diatonic key signature — treble clef, sharps, and flats — for all twelve keys around the perimeter.
 
 Settings (string count, tuning, tonic, scale, mode, and theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open**.
-
-The diagram below shows an 8-string guitar in drop-E tuning, diatonic scale, Aeolian (natural minor) mode — i.e. E-minor — with the E-minor chord highlighted.
 
 ![fretboard](doc/fretboard.png)
 
 ## Known limitations
 
-* Chord voicings are displayed for all positions across the neck without filtering by playability (hand span, fretting difficulty, or string-skip constraints). It is up to the player to use the highlighted positions to form practical chord shapes or arpeggios.
+* **Key signatures on the Circle of Fifths** are fixed to the standard diatonic (natural major / natural minor) key signatures for all twelve positions, regardless of the scale selected. For non-diatonic scales such as harmonic minor, melodic minor, or Hungarian minor, the raised or lowered scale degrees are not reflected in the displayed key signatures. Properly annotating these alterations (e.g. showing G♯ as an in-score accidental for A harmonic minor) is planned for a future release.
+* **Chord voicing playability**: the chord-finding algorithm uses heuristics to discard obviously unplayable shapes (excessive hand span, large string skips), but the filtering is imperfect. Some displayed voicings may still be difficult or impossible to play, and occasionally playable shapes may be excluded. It is up to the player to judge which highlighted positions form practical chord shapes or arpeggios.
 * There is currently no audio playback or MIDI export, but this is planned for a future release.
 
 ## Installation

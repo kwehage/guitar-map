@@ -60,7 +60,7 @@
       border: 1px solid var(--gm-border);
       cursor: pointer;
       border-radius: 3px;
-      font-size: 13px;
+      font-size: 14px;
     }
     button:hover { filter: brightness(0.93); }
 
@@ -71,13 +71,6 @@
       gap: 24px;
       padding: 10px;
       align-items: flex-start;
-    }
-
-    /* Left: string count + string inputs */
-    #left-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
     }
 
     #right-panel {
@@ -102,8 +95,14 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-      padding-left: 8px;
-      padding-top: 34px;
+    }
+
+    #skip-pattern {
+      font-family: monospace;
+      font-size: 16px;
+      opacity: 0.7;
+      white-space: nowrap;
+      margin-left: 10px;
     }
 
     .rel-key-row {
@@ -138,7 +137,7 @@
     /* ── Chord buttons + transitions ── */
     #chord-area {
       display: flex;
-      gap: 16px;
+      gap: 24px;
       align-items: flex-start;
     }
 
@@ -148,26 +147,45 @@
       gap: 4px;
     }
 
-    #chord-transitions {
+    .trans-section {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
+    .trans-section-label {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
     .trans-label {
-      width: 140px;
+      width: 160px;
       text-align: right;
-      font-size: 11px;
+      font-size: 13px;
       flex-shrink: 0;
       padding-right: 8px;
       opacity: 0.7;
     }
 
+    .borrowed-mode-label {
+      min-width: 140px;
+      text-align: right;
+      font-size: 13px;
+      flex-shrink: 0;
+      padding-right: 8px;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
     .trans-btn {
-      min-width: 52px;
-      height: 28px;
-      font-size: 11px;
-      padding: 0 8px;
+      min-width: 120px;
+      height: 30px;
+      font-size: 13px;
+      padding: 0 4px;
       white-space: nowrap;
       background-color: var(--gm-btn-bg);
       color: var(--gm-btn-text);
@@ -176,6 +194,12 @@
       border-radius: 3px;
     }
     .trans-btn:hover { filter: brightness(0.93); }
+    .trans-btn.secondary {
+      background-color: var(--gm-secondary-btn-bg);
+      color: var(--gm-secondary-btn-text);
+      border-color: transparent;
+      opacity: 0.55;
+    }
     .trans-btn.active {
       background-color: var(--gm-active-btn-bg);
       color: var(--gm-active-btn-text);
@@ -192,18 +216,17 @@
     .chord-row-label {
       width: 110px;       /* matches .control-row label so buttons align with dropdowns */
       text-align: right;
-      font-size: 12px;
+      font-size: 13px;
       flex-shrink: 0;
       padding-right: 8px;
     }
 
     .chord-btn {
-      width: 52px;
-      height: 28px;
-      font-size: 11px;
-      padding: 0;
+      width: 120px;
+      height: 30px;
+      font-size: 13px;
+      padding: 0 4px;
       white-space: nowrap;
-      overflow: hidden;
     }
     .chord-btn.active {
       background-color: var(--gm-active-btn-bg);
@@ -216,9 +239,65 @@
       border-color: transparent;
     }
 
+    /* ── Circle of Fifths ── */
+    #cof-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .cof-title {
+      font-size: 11px;
+      opacity: 0.6;
+      margin-bottom: 2px;
+    }
+    #circle-of-fifths {
+      position: relative;
+    }
+
     /* ── Fretboard ── */
     #fretboard {
       width: 100%;
+    }
+
+    /* ── Chord diagrams ── */
+    #chord-diagrams {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px;
+    }
+
+    .chord-position-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .chord-diagram-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .chord-diagram-wrap.selected {
+      box-shadow: 0 0 0 2px var(--gm-text);
+      border-radius: 3px;
+    }
+
+    /* ── Chord notes ── */
+    #chord-notes {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 4px 0;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
     }
 
     /* ── Preferences modal ── */
@@ -237,7 +316,7 @@
       border: 1px solid var(--gm-border);
       border-radius: 6px;
       padding: 20px 24px;
-      min-width: 280px;
+      min-width: 300px;
     }
     .modal-title {
       font-weight: 600;
@@ -262,16 +341,6 @@
 <body>
 
 <div id="controls">
-  <!-- Left: string configuration -->
-  <div id="left-panel">
-    <div class="control-row">
-      <label>Number of strings</label>
-      <select id="num-strings" style="width:100px"></select>
-    </div>
-    <div id="string-inputs"></div>
-  </div>
-
-  <!-- Right: scale/mode dropdowns + relative key display, then chord buttons below -->
   <div id="right-panel">
     <div id="scale-mode-row">
       <div id="scale-controls">
@@ -286,9 +355,15 @@
         <div class="control-row">
           <label>Mode</label>
           <select id="mode" style="width:300px"></select>
+          <span id="skip-pattern"></span>
         </div>
       </div>
-      <div id="relative-keys">
+    </div>
+    <div style="height:8px"></div>
+    <div id="chord-area">
+      <div id="chord-buttons"></div>
+      <div class="trans-section" id="relative-keys">
+        <div class="trans-section-label">Relative keys:</div>
         <div class="rel-key-row">
           <span class="rel-key-label">Relative major</span>
           <span id="rel-major-value" class="rel-key-value"></span>
@@ -298,11 +373,33 @@
           <span id="rel-minor-value" class="rel-key-value"></span>
         </div>
       </div>
-    </div>
-    <div style="height:8px"></div>
-    <div id="chord-area">
-      <div id="chord-buttons"></div>
-      <div id="chord-transitions" style="display:none">
+      <div class="trans-section" id="tonic-alterations">
+        <div class="trans-section-label">Tonic alterations:</div>
+        <div class="chord-row">
+          <span class="trans-label">Neapolitan (♭II)</span>
+          <button class="trans-btn" id="tonic-alt-b2"></button>
+        </div>
+        <div class="chord-row">
+          <span class="trans-label">♭III</span>
+          <button class="trans-btn" id="tonic-alt-b3"></button>
+        </div>
+        <div class="chord-row">
+          <span class="trans-label">Minor subdominant (iv)</span>
+          <button class="trans-btn" id="tonic-alt-iv"></button>
+        </div>
+        <div class="chord-row">
+          <span class="trans-label">♭VI</span>
+          <button class="trans-btn" id="tonic-alt-b6"></button>
+        </div>
+        <div class="chord-row">
+          <span class="trans-label">Subtonic (♭VII)</span>
+          <button class="trans-btn" id="tonic-alt-b7"></button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div id="chord-notes"></div>
+        <div class="trans-section" id="chord-transitions" style="visibility:hidden">
+        <div class="trans-section-label">Common out-of-key chord transitions:</div>
         <div class="chord-row">
           <span class="trans-label">Secondary dominant</span>
           <button class="trans-btn" id="trans-sec-dom"></button>
@@ -317,12 +414,21 @@
           <button class="trans-btn" id="trans-med-up-M3"></button>
           <button class="trans-btn" id="trans-med-dn-M3"></button>
         </div>
+        </div>
+      </div>
+      <div class="trans-section" id="borrowed-chords" style="visibility:hidden">
+        <div class="trans-section-label">Borrowed chords:</div>
+        <div id="borrowed-chord-rows"></div>
       </div>
     </div>
+  </div>
+  <div id="cof-container">
+    <div id="circle-of-fifths"></div>
   </div>
 </div>
 
 <div id="fretboard"></div>
+<div id="chord-diagrams"></div>
 
 <!-- Preferences modal -->
 <div id="preferences-modal" class="modal hidden">
@@ -332,6 +438,11 @@
       <label for="theme-select">Theme</label>
       <select id="theme-select" style="width:140px"></select>
     </div>
+    <div class="modal-body">
+      <label for="num-strings">Strings</label>
+      <select id="num-strings" style="width:100px"></select>
+    </div>
+    <div id="string-inputs" style="margin-bottom:16px"></div>
     <div class="modal-footer">
       <button id="close-preferences-btn">Close</button>
     </div>
