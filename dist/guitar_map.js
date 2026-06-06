@@ -353,6 +353,14 @@ function notePitchClass(note) {
   return NOTE_NAMES.indexOf(fullNote); // 0=C … 11=B, matches MIDI pitchClass = noteNumber % 12
 }
 
+function noteNameToMidi(note) {
+  const { name, accidental, octave } = extractNoteAndOctave(validateNote(note));
+  let fullNote = name + accidental;
+  if (accidental === 'b') fullNote = NOTE_NAMES[(NOTE_NAMES.indexOf(name) - 1 + 12) % 12];
+  // MIDI middle C (C4) = 60 = 4*12 + 0 + 12
+  return octave * 12 + NOTE_NAMES.indexOf(fullNote) + 12;
+}
+
 function transposeNote(note, semitoneOffset) {
   note = validateNote(note);
   const { name, accidental, octave } = extractNoteAndOctave(note);
@@ -1454,12 +1462,11 @@ function buildFretboardData() {
 
   // ── MIDI note highlights ──────────────────────────────────────────────────
   if (midiActiveNotes.size > 0) {
-    const midiPCs = new Set([...midiActiveNotes].map(n => n % 12));
     for (let si = 0; si < state.numStrings; si++) {
       const baseNote = stringLabels[si];
       const y = strPosRev[si];
       const highlight = (x, note) => {
-        if (!midiPCs.has(notePitchClass(note))) return;
+        if (!midiActiveNotes.has(noteNameToMidi(note))) return;
         const inScale = notesInScale.some(sn => isOctaveOfNote(note, sn));
         const inChord = notesInChord.some(cn => isOctaveOfNote(cn, note));
         if (inScale || inChord) {
@@ -1476,6 +1483,12 @@ function buildFretboardData() {
     }
   }
 
+  // Pin the y-axis range explicitly so that large MIDI markers (circle-open,
+  // size 26) do not cause Plotly to add extra padding and compress string spacing.
+  const yDataMin = -STRING_SCALE_FACTOR;                              // fret-dot row
+  const yDataMax = (state.numStrings - 1) * STRING_SCALE_FACTOR;     // highest string
+  const yPad    = STRING_SCALE_FACTOR * 0.4;
+
   const layout = {
     showlegend: false,
     plot_bgcolor: tc.bg, paper_bgcolor: tc.bg,
@@ -1483,7 +1496,7 @@ function buildFretboardData() {
     height: state.numStrings * 30 + 20,
     autosize: true,
     xaxis: { visible:false, fixedrange:true, range:[-0.5, lastX+0.3] },
-    yaxis: { visible:false, fixedrange:true },
+    yaxis: { visible:false, fixedrange:true, range:[yDataMin - yPad, yDataMax + yPad] },
     annotations,
   };
 
