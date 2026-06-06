@@ -1471,10 +1471,12 @@ function buildFretboardData() {
         const inChord = notesInChord.some(cn => isOctaveOfNote(cn, note));
         if (inScale || inChord) {
           traces.push({ x:[x], y:[y], mode:'markers', hoverinfo:'skip', type:'scatter',
+            cliponaxis: false,
             marker:{ symbol:'circle-open', color:tc.midi_fill, size:26,
                      line:{ color:tc.midi_fill, width:3 } } });
         } else {
           traces.push({ x:[x], y:[y], mode:'markers', hoverinfo:'skip', type:'scatter',
+            cliponaxis: false,
             marker:{ symbol:'circle', color:tc.midi_fill, size:20 } });
         }
       };
@@ -1487,7 +1489,9 @@ function buildFretboardData() {
   // size 26) do not cause Plotly to add extra padding and compress string spacing.
   const yDataMin = -STRING_SCALE_FACTOR;                              // fret-dot row
   const yDataMax = (state.numStrings - 1) * STRING_SCALE_FACTOR;     // highest string
-  const yPad    = STRING_SCALE_FACTOR * 0.4;
+  // Padding must exceed the visual radius of a 26px MIDI ring in data units.
+  // 1.0 × STRING_SCALE_FACTOR gives comfortable clearance across all string counts.
+  const yPad    = STRING_SCALE_FACTOR * 1.0;
 
   const layout = {
     showlegend: false,
