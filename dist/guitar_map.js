@@ -2139,3 +2139,11 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// Re-render the fretboard on viewport resize (handles device rotation and
+// browser chrome show/hide on mobile). Debounced to avoid thrashing.
+let _resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(renderFretboard, 150);
+});

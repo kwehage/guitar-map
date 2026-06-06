@@ -38,6 +38,11 @@
 
     *, *::before, *::after { box-sizing: border-box; }
 
+    /* Prevent overflow-x on body from propagating to the viewport (a CSS quirk
+       that causes tablet browsers to report body.clientWidth as content width
+       rather than viewport width, breaking Plotly's autosize measurement). */
+    html { overflow-x: hidden; }
+
     body {
       margin: 0;
       background-color: var(--gm-bg);
@@ -263,6 +268,7 @@
     /* ── Fretboard ── */
     #fretboard {
       width: 100%;
+      max-width: 100vw;
     }
 
     /* ── Chord diagrams ── */
@@ -271,6 +277,7 @@
       flex-direction: column;
       gap: 4px;
       padding: 10px;
+      max-width: 100vw;
     }
 
     .chord-position-row {
@@ -473,7 +480,9 @@
       </div>
       <div id="string-inputs" style="margin-bottom:16px"></div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+      <a href="https://github.com/kwehage/guitar-map#readme" target="_blank" rel="noopener"
+         style="font-size:14px; opacity:0.7; color:inherit; text-decoration:underline;">About</a>
       <button id="close-preferences-btn">Close</button>
     </div>
   </div>
