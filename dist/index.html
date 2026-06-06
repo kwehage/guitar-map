@@ -74,31 +74,13 @@
 
     /* ── Controls panel ── */
     #controls {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      grid-template-areas:
-        "scale cof"
-        "buttons cof";
-      column-gap: 24px;
-      row-gap: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       padding: 10px;
-      align-items: start;
-    }
-
-    /* On narrow screens (tablets in portrait, small laptops) the COF and
-       tonic-alterations columns wrap below the main controls. */
-    @media (max-width: 900px) {
-      #controls {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-          "scale"
-          "buttons"
-          "cof";
-      }
     }
 
     #scale-controls {
-      grid-area: scale;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -109,7 +91,6 @@
     }
 
     #chord-buttons-area {
-      grid-area: buttons;
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
@@ -264,7 +245,6 @@
 
     /* ── Circle of Fifths ── */
     #cof-container {
-      grid-area: cof;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -410,9 +390,6 @@
       <span id="skip-pattern"></span>
     </div>
   </div>
-  <div id="cof-container">
-    <div id="circle-of-fifths"></div>
-  </div>
   <div id="chord-buttons-area">
     <div id="chord-buttons"></div>
     <div class="trans-section" id="tonic-alterations">
@@ -437,6 +414,9 @@
         <span class="trans-label">Subtonic (♭VII)</span>
         <button class="trans-btn" id="tonic-alt-b7"></button>
       </div>
+    </div>
+    <div id="cof-container">
+      <div id="circle-of-fifths"></div>
     </div>
   </div>
 </div>
