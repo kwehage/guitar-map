@@ -11,5 +11,7 @@ __pycache__/
 dist/venv
 dist/guitar_map
 dist/guitar_map.exe
+dist/guitar_map.py
+requirements.txt
 .build_venv
 .build_work
