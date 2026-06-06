@@ -3,7 +3,7 @@
 Guitar Map is a tool to procedurally generate and display fretboard diagrams for 4–10 string guitars and basses. It is intended to help guitarists familiarize themselves with the fretboard and basic music theory, particularly when using non-standard tunings or more than six strings.
 
 The tool allows you to configure:
-* **Tuning**: choose from 27+ named presets spanning 4–8 string bass and guitar configurations — including standard, drop, open, and extended-range tunings (e.g. 7-string B Standard, 8-string Drop E, DADGAD, Mirar) — or select **Custom** to enter each string's pitch individually.
+* **Tuning**: choose from 27+ named presets spanning 4–8 string bass and guitar configurations — including standard, drop, open, and extended-range tunings (e.g. 7-string B Standard, 8-string Drop E, DADGAD, Mirar) — or select **Custom** to enter each string's pitch individually for a configurable number of strings up to 10.
 * Tonic (root note) of the first mode of the scale — for example, inputting C as the tonic for the diatonic scale with the Ionian (natural major) mode selected produces a C-Major scale; selecting the Aeolian (natural minor) mode produces a relative A-minor scale.
 * Scale (diatonic, harmonic minor, melodic minor, Hungarian minor, pentatonic, blues, augmented, diminished — hover over a mode name for a tooltip listing alternate names)
 * Mode of the scale
@@ -12,14 +12,14 @@ From those inputs it displays:
 * A fretboard diagram with every position labelled — hover over any position to see the note name and frequency in Hz.
 * All notes in the scale highlighted with circles; the tonic of the current mode is shown in black.
 * All diatonic chord voicings for the scale; click a chord to highlight every matching position on the fretboard.
-* **Chord note chips**: when a chord is selected, its notes are displayed as labeled chips. Clicking a tonic alteration chord (Neapolitan, ♭III, iv, ♭VI, ♭VII) shows its notes the same way.
+* **Chord notes**: when a chord is selected, its notes are displayed as labeled / color-coded "chips". Clicking a tonic alteration chord (Neapolitan, ♭III, iv, ♭VI, ♭VII) shows its notes the same way.
 * **Chord transition display**: when a transition or borrowed chord is also selected, a ↓ arrow appears and a second row of chips shows the notes of the target chord, making it easy to see voice-leading between two chords.
 * For each chord, common out-of-key transitions: secondary dominant, chromatic mediants (major and minor third up and down).
 * Borrowed chord suggestions from parallel modes of the same scale.
 * Tonic alteration chords: Neapolitan (♭II), ♭III, minor subdominant (iv), ♭VI, and subtonic (♭VII).
 * A **Circle of Fifths** diagram that highlights the active key, shows the relative major/minor relationship, and displays the standard diatonic key signature — treble clef, sharps, and flats — for all twelve keys around the perimeter.
 
-Settings (tuning preset, tonic, scale, mode, and theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open**.
+Settings (tuning preset, tonic, scale, mode, and theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open** (note this feature is only supported on the Electron desktop app).
 
 ![fretboard](doc/fretboard.png)
 
@@ -47,7 +47,7 @@ Once installed, the app opens in its own window without browser chrome and cache
 
 ### Option 2 — Electron desktop app
 
-If you prefer a native desktop window without a browser, Guitar Map can also be packaged as an Electron application.
+If you prefer a native desktop window without a browser, Guitar Map is also  packaged as an Electron application.
 
 #### Prebuilt binaries
 
