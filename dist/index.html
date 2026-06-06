@@ -431,6 +431,14 @@
 
 <div id="chord-info-row">
   <div id="chord-notes-area">
+    <div id="chord-auto-play" style="display:none; gap:16px; align-items:center; margin-bottom:4px; font-size:13px;">
+      <label style="display:flex; align-items:center; gap:5px; cursor:pointer; user-select:none;">
+        <input type="checkbox" id="auto-play-synth"> Play
+      </label>
+      <label style="display:flex; align-items:center; gap:5px; cursor:pointer; user-select:none;">
+        <input type="checkbox" id="auto-play-midi"> Send MIDI
+      </label>
+    </div>
     <div id="chord-notes"></div>
     <div id="chord-trans-arrow" style="display:none">↓</div>
     <div id="chord-trans-notes" style="display:none"></div>
@@ -486,7 +494,16 @@
         <option value="">None</option>
       </select>
     </div>
-    <div id="midi-status" style="font-size:13px; opacity:0.6; margin:-12px 0 16px 0;"></div>
+    <div id="midi-status" style="font-size:13px; margin:-12px 0 16px 0;"></div>
+    <div class="modal-body">
+      <label for="midi-output-select">MIDI Output</label>
+      <select id="midi-output-select" style="width:280px">
+        <option value="">None</option>
+      </select>
+    </div>
+    <div id="midi-output-status" style="font-size:13px; margin:-12px 0 16px 0; opacity:0.6;">
+      Select a virtual MIDI port to send chord notes to your DAW (IAC Driver on macOS, loopMIDI on Windows).
+    </div>
     <div class="modal-footer" style="justify-content: space-between; align-items: center;">
       <a href="https://github.com/kwehage/guitar-map#readme" target="_blank" rel="noopener"
          style="font-size:14px; opacity:0.7; color:inherit; text-decoration:underline;">About</a>

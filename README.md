@@ -132,8 +132,65 @@ npm run prebuild
 npm start          # opens the app in an Electron window
 ```
 
+## MIDI
+
+### MIDI input — highlight notes and play audio
+
+Connect a MIDI controller and select it in **⚙ Preferences → MIDI Input**. Notes played on the device are highlighted on the fretboard in yellow and played back through a synthetic plucked-string sound. Octave is respected — playing E2 highlights only E2 positions, not every E on the neck.
+
+### MIDI output — send chord voicings to a DAW
+
+Select a virtual MIDI port in **⚙ Preferences → MIDI Output**. With the **Send MIDI** checkbox enabled in the chord area, clicking any chord voicing diagram sends the chord notes to the selected port as MIDI note-on/off messages on channel 1, strummed low string to high at 28 ms per string.
+
+### Setting up a virtual MIDI port
+
+Browsers and Electron apps cannot create new system MIDI ports — they can only send to ports that already exist. To route MIDI between Guitar Map and a DAW you need a **virtual MIDI port**: a software loopback where Guitar Map writes to one end and the DAW reads from the other.
+
+#### macOS — IAC Driver (built in, no extra software)
+
+1. Open **Audio MIDI Setup** (`/Applications/Utilities/`)
+2. **Window → Show MIDI Studio**
+3. Double-click **IAC Driver**, check **Device is online**, click **+** to add a port if none exists, click **Apply**
+4. In Guitar Map: **Preferences → MIDI Output** → select **IAC Driver Bus 1**
+5. In your DAW: set a MIDI track input to **IAC Driver Bus 1**
+
+#### Windows — loopMIDI (free)
+
+1. Download and install [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html)
+2. Add a virtual port (click **+**), name it (e.g. *Guitar Map*)
+3. In Guitar Map: **Preferences → MIDI Output** → select the loopMIDI port
+4. In your DAW: set a MIDI track input to the same loopMIDI port
+
+#### Linux — PipeWire + a2jmidid
+
+PipeWire is the audio system on most modern Linux distributions. Install `pipewire-jack` to enable JACK compatibility, then use `a2jmidid` to bridge ALSA MIDI ports into PipeWire's graph:
+
+```bash
+# Arch
+sudo pacman -S pipewire-jack
+
+# Debian / Ubuntu
+sudo apt install pipewire-jack
+```
+
+Start the bridge (keep this running while using Guitar Map):
+
+```bash
+pw-jack a2jmidid -e &
+```
+
+Open **Helvum** or **qpwgraph** (graphical PipeWire patchbay) and drag a cable from the **Midi Through** node to your DAW's MIDI input node. Then in Guitar Map: **Preferences → MIDI Output** → select **Midi Through Port-0**.
+
+### Sharing a MIDI controller between Guitar Map and a DAW simultaneously
+
+By default on Windows, a MIDI input port can only be opened by one application at a time. On macOS and Linux, multiple apps can read the same port at once. If your DAW has exclusive access to the port and Guitar Map cannot see the device:
+
+- **macOS**: In the DAW, add an IAC Driver bus as a MIDI output and enable MIDI echo/through to that bus. Set Guitar Map's **MIDI Input** to the IAC bus.
+- **Windows**: Install loopMIDI, configure the DAW to forward incoming MIDI to the loopMIDI port, set Guitar Map's **MIDI Input** to the loopMIDI port.
+- **Linux (PipeWire)**: Run `pw-jack a2jmidid -e &`, then use Helvum or qpwgraph to fan the physical controller's ALSA port out to both the DAW and Guitar Map.
+
 ## Known limitations
 
 * **Key signatures on the Circle of Fifths** are fixed to the standard diatonic (natural major / natural minor) key signatures for all twelve positions, regardless of the scale selected. For non-diatonic scales such as harmonic minor, melodic minor, or Hungarian minor, the raised or lowered scale degrees are not reflected in the displayed key signatures. Properly annotating these alterations (e.g. showing G♯ as an in-score accidental for A harmonic minor) is planned for a future release.
 * **Chord voicing playability**: the chord-finding algorithm uses heuristics to discard obviously unplayable shapes (excessive hand span, large string skips), but the filtering is imperfect. Some displayed voicings may still be difficult or impossible to play, and occasionally playable shapes may be excluded. It is up to the player to judge which highlighted positions form practical chord shapes or arpeggios.
-* There is currently no audio playback or MIDI export, but this is planned for a future release.
+* Audio playback is supported for MIDI input notes and chord voicings via Karplus-Strong synthesis; more sophisticated sounds can be achieved by routing MIDI output to an external virtual instrument or through your DAW.

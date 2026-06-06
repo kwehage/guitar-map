@@ -546,6 +546,7 @@ function persistState() {
     num_strings: state.numStrings,
     tonic: state.tonic, scale: state.scale, mode: state.mode, theme: state.theme,
     midiDeviceId: state.midiDeviceId,
+    midiOutputId: state.midiOutputId,
   };
   for (let i = 0; i < 10; i++) s[`string_${i + 1}`] = state.strings[i];
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
@@ -562,6 +563,7 @@ const state = {
   mode:  saved?.mode  ?? 0,
   theme: saved?.theme ?? 'light',
   midiDeviceId: saved?.midiDeviceId ?? null,
+  midiOutputId: saved?.midiOutputId ?? null,
   activeChord: null,
   baseAltChord: null,
   transitionChord: null,
@@ -583,6 +585,7 @@ function applyTheme() {
 // ── MIDI ──────────────────────────────────────────────────────────────────────
 
 let midiAccess = null;
+let midiOutputDevice = null;  // currently selected Web MIDI output port
 const midiActiveNotes = new Set(); // active MIDI note numbers (0–127)
 
 let _midiRenderPending = false;
@@ -592,11 +595,30 @@ function scheduleMidiRender() {
   requestAnimationFrame(() => { _midiRenderPending = false; renderFretboard(); });
 }
 
+function playMidiNote(noteNumber) {
+  const freq = 440 * Math.pow(2, (noteNumber - 69) / 12);
+  const ctx  = getAudioCtx();
+  const ab   = karplusBuffer(ctx, freq);
+  const src  = ctx.createBufferSource();
+  src.buffer = ab;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = Math.min(9000, freq * 14);
+  lp.Q.value = 0.5;
+  const gain = ctx.createGain();
+  gain.gain.value = 0.4;
+  src.connect(lp);
+  lp.connect(gain);
+  gain.connect(ctx.destination);
+  src.start();
+}
+
 function handleMidiMessage(event) {
   const [status, note, velocity] = event.data;
   const type = status & 0xF0;
   if (type === 0x90 && velocity > 0) {
     midiActiveNotes.add(note);
+    playMidiNote(note);
   } else if (type === 0x80 || (type === 0x90 && velocity === 0)) {
     midiActiveNotes.delete(note);
   } else {
@@ -619,6 +641,14 @@ function setMidiDevice(deviceId) {
   renderFretboard();
 }
 
+function midiStatusMsg(msg, isWarning = false) {
+  const el = document.getElementById('midi-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isWarning ? 'var(--gm-text)' : '';
+  el.style.opacity = isWarning ? '1' : '0.6';
+}
+
 function populateMidiDevices() {
   const sel = document.getElementById('midi-device-select');
   if (!sel || !midiAccess) return;
@@ -631,36 +661,170 @@ function populateMidiDevices() {
   }
   const ids = [...midiAccess.inputs.keys()];
   sel.value = ids.includes(prev) ? prev : (ids.includes(state.midiDeviceId) ? state.midiDeviceId : '');
+
+  if (ids.length === 0) {
+    midiStatusMsg(
+      'No MIDI inputs detected. If your device is open in a DAW, the DAW may hold ' +
+      'exclusive access to the port. Route MIDI through a virtual port (IAC Driver on ' +
+      'macOS, loopMIDI on Windows) so both apps can receive simultaneously.',
+      true
+    );
+  } else if (state.midiDeviceId && !ids.includes(state.midiDeviceId)) {
+    midiStatusMsg(
+      'Previously selected device is no longer available — it may have been claimed by ' +
+      'another application. Select a different input or set up a virtual MIDI port.',
+      true
+    );
+  } else {
+    midiStatusMsg('');
+  }
 }
 
 async function initMidi() {
   if (!navigator.requestMIDIAccess) {
-    const el = document.getElementById('midi-status');
-    if (el) el.textContent = 'Web MIDI API not supported in this browser.';
+    midiStatusMsg('Web MIDI API not supported in this browser.', true);
     return;
   }
   try {
     midiAccess = await navigator.requestMIDIAccess();
-    const statusEl = document.getElementById('midi-status');
-    if (statusEl) statusEl.textContent = '';
     populateMidiDevices();
+    populateMidiOutputs();
     if (state.midiDeviceId && midiAccess.inputs.has(state.midiDeviceId)) {
       const inp = midiAccess.inputs.get(state.midiDeviceId);
       if (inp) inp.onmidimessage = handleMidiMessage;
       const sel = document.getElementById('midi-device-select');
       if (sel) sel.value = state.midiDeviceId;
     }
+    if (state.midiOutputId && midiAccess.outputs.has(state.midiOutputId)) {
+      midiOutputDevice = midiAccess.outputs.get(state.midiOutputId) || null;
+    }
     midiAccess.onstatechange = () => {
       populateMidiDevices();
+      populateMidiOutputs();
       if (state.midiDeviceId && !midiAccess.inputs.has(state.midiDeviceId)) {
         midiActiveNotes.clear();
         scheduleMidiRender();
       }
     };
   } catch (err) {
-    const el = document.getElementById('midi-status');
-    if (el) el.textContent = `MIDI access denied: ${err.message}`;
+    midiStatusMsg(`MIDI access denied: ${err.message}`, true);
   }
+}
+
+function populateMidiOutputs() {
+  const sel = document.getElementById('midi-output-select');
+  if (!sel || !midiAccess) return;
+  const prev = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  for (const [id, out] of midiAccess.outputs) {
+    const opt = document.createElement('option');
+    opt.value = id; opt.textContent = out.name;
+    sel.appendChild(opt);
+  }
+  const ids = [...midiAccess.outputs.keys()];
+  const next = ids.includes(prev) ? prev : (ids.includes(state.midiOutputId) ? state.midiOutputId : '');
+  sel.value = next;
+  midiOutputDevice = next ? (midiAccess.outputs.get(next) || null) : null;
+}
+
+function setMidiOutput(deviceId) {
+  state.midiOutputId = deviceId || null;
+  persistState();
+  midiOutputDevice = (midiAccess && deviceId) ? (midiAccess.outputs.get(deviceId) || null) : null;
+}
+
+// ── Chord audio playback ──────────────────────────────────────────────────────
+
+// Returns notes in the selected voicing from lowest string to highest string,
+// skipping muted strings. Each element is a note string with octave, e.g. "E2".
+function voicingNotes() {
+  if (!state.selectedVoicing) return [];
+  const stringNotes = state.strings.slice(0, state.numStrings).map(validateNote);
+  const notes = [];
+  // strings[0] = highest pitched string, strings[numStrings-1] = lowest — strum low→high
+  for (let s = state.numStrings - 1; s >= 0; s--) {
+    const fret = state.selectedVoicing[s];
+    if (fret < 0) continue; // muted string
+    notes.push(transposeNote(stringNotes[s], fret));
+  }
+  return notes;
+}
+
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx || _audioCtx.state === 'closed') {
+    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+// Karplus-Strong plucked-string synthesis: fills an AudioBuffer for a single note.
+function karplusBuffer(ctx, freq) {
+  const sr = ctx.sampleRate;
+  const N = Math.max(2, Math.round(sr / freq));
+  const duration = 3.5;
+  const numSamples = Math.round(sr * duration);
+  const ab = ctx.createBuffer(1, numSamples, sr);
+  const data = ab.getChannelData(0);
+
+  const ring = new Float32Array(N);
+  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+
+  // Decay: tuned so notes naturally fade in ~2-3 s; lower notes decay more slowly
+  const decay = Math.exp(-Math.log(2) / (freq * 1.2));
+
+  for (let i = 0; i < numSamples; i++) {
+    const pos = i % N;
+    data[i] = ring[pos];
+    ring[pos] = decay * 0.5 * (ring[pos] + ring[(pos + 1) % N]);
+  }
+  return ab;
+}
+
+function playVoicingSynth() {
+  const notes = voicingNotes();
+  if (!notes.length) return;
+  const ctx = getAudioCtx();
+
+  // Master gain normalised for string count
+  const master = ctx.createGain();
+  master.gain.value = 0.65 / Math.sqrt(notes.length);
+  master.connect(ctx.destination);
+
+  const now = ctx.currentTime;
+  notes.forEach((note, i) => {
+    const freq = noteToFrequency(note);
+    const ab   = karplusBuffer(ctx, freq);
+
+    const src = ctx.createBufferSource();
+    src.buffer = ab;
+
+    // Gentle high-frequency rolloff to soften the attack
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = Math.min(9000, freq * 14);
+    lp.Q.value = 0.5;
+
+    src.connect(lp);
+    lp.connect(master);
+    src.start(now + i * 0.028); // 28 ms per string — realistic strum speed
+  });
+}
+
+function sendVoicingMidi() {
+  if (!midiOutputDevice) return;
+  const notes = voicingNotes();
+  if (!notes.length) return;
+  const channel  = 0;   // MIDI channel 1
+  const velocity = 80;
+  const holdMs   = 1500;
+  notes.forEach((note, i) => {
+    const nn = noteNameToMidi(note);
+    const t  = i * 28;
+    setTimeout(() => midiOutputDevice.send([0x90 | channel, nn, velocity]), t);
+    setTimeout(() => midiOutputDevice.send([0x80 | channel, nn, 0]),        t + holdMs);
+  });
 }
 
 // ── Circle of Fifths ─────────────────────────────────────────────────────────
@@ -1184,8 +1348,14 @@ function renderChordNotes() {
     noteDisplayNames = chordNotes.map(n => noteName(n, useFlats));
   }
 
-  if (!chordNotes.length) { container.style.display = 'none'; return; }
+  const autoPlayRow = document.getElementById('chord-auto-play');
+  if (!chordNotes.length) {
+    container.style.display = 'none';
+    if (autoPlayRow) autoPlayRow.style.display = 'none';
+    return;
+  }
   container.style.display = 'flex';
+  if (autoPlayRow) autoPlayRow.style.display = 'flex';
 
   const NS = 'http://www.w3.org/2000/svg';
   for (let i = 0; i < chordNotes.length; i++) {
@@ -1905,6 +2075,10 @@ function renderChordDiagrams() {
         container.querySelectorAll('.chord-diagram-wrap').forEach(el => {
           el.classList.toggle('selected', el.dataset.voicingKey === activeKey);
         });
+        if (state.selectedVoicing) {
+          if (document.getElementById('auto-play-synth')?.checked) playVoicingSynth();
+          if (document.getElementById('auto-play-midi')?.checked)  sendVoicingMidi();
+        }
         const fig = buildFretboardData();
         if (fig) Plotly.react('fretboard', fig.traces, fig.layout, { displayModeBar: false, responsive: true });
       });
@@ -2248,6 +2422,8 @@ function init() {
   const openPreferences = () => {
     tuningSel.value = detectCurrentTuning();
     syncCustomSection();
+    populateMidiDevices();
+    populateMidiOutputs();
     document.getElementById('preferences-modal').classList.remove('hidden');
   };
   document.getElementById('open-preferences-btn').addEventListener('click', openPreferences);
@@ -2259,11 +2435,14 @@ function init() {
       document.getElementById('preferences-modal').classList.add('hidden');
   });
 
-  // MIDI device selector
+  // MIDI device selectors
   document.getElementById('midi-device-select').addEventListener('change', e => {
     setMidiDevice(e.target.value || null);
     const sel = document.getElementById('midi-device-select');
     if (sel) sel.value = state.midiDeviceId ?? '';
+  });
+  document.getElementById('midi-output-select').addEventListener('change', e => {
+    setMidiOutput(e.target.value || null);
   });
 
   // Start MIDI access (async — populates device list when permission is granted)
