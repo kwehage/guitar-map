@@ -69,36 +69,40 @@
 
     /* ── Controls panel ── */
     #controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "scale cof"
+        "buttons cof";
+      column-gap: 24px;
+      row-gap: 12px;
       padding: 10px;
-      align-items: flex-start;
-      position: relative;
-    }
-
-    #right-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    #scale-mode-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 24px;
+      align-items: start;
     }
 
     #scale-controls {
+      grid-area: scale;
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
-    #relative-keys {
+    #scale-controls select {
+      font-size: 15px;
+    }
+
+    #chord-buttons-area {
+      grid-area: buttons;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    #chord-info-row {
+      display: flex;
+      gap: 24px;
+      padding: 0 10px 10px 10px;
+      align-items: flex-start;
     }
 
     #skip-pattern {
@@ -107,22 +111,6 @@
       opacity: 0.7;
       white-space: nowrap;
       margin-left: 10px;
-    }
-
-    .rel-key-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      height: 30px;
-    }
-
-    .rel-key-label {
-      white-space: nowrap;
-      width: 110px;
-    }
-
-    .rel-key-value {
-      font-weight: bold;
     }
 
     .control-row {
@@ -138,13 +126,7 @@
 
     .string-input { width: 100px; }
 
-    /* ── Chord buttons + transitions ── */
-    #chord-area {
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
-    }
-
+    /* ── Chord buttons ── */
     #chord-buttons {
       display: flex;
       flex-direction: column;
@@ -161,7 +143,8 @@
       height: 30px;
       display: flex;
       align-items: center;
-      font-size: 12px;
+      font-size: 15px;
+      font-weight: bold;
       opacity: 0.7;
       white-space: nowrap;
     }
@@ -186,7 +169,7 @@
     }
 
     .trans-btn {
-      min-width: 120px;
+      min-width: 102px;
       height: 30px;
       font-size: 13px;
       padding: 0 4px;
@@ -226,7 +209,7 @@
     }
 
     .chord-btn {
-      width: 120px;
+      width: 102px;
       height: 30px;
       font-size: 13px;
       padding: 0 4px;
@@ -245,7 +228,7 @@
 
     /* ── Settings gear button ── */
     #settings-btn {
-      position: absolute;
+      position: fixed;
       top: 8px;
       right: 8px;
       width: 30px;
@@ -257,14 +240,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 100;
     }
 
     /* ── Circle of Fifths ── */
     #cof-container {
+      grid-area: cof;
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-left: auto;
       flex-shrink: 0;
     }
     .cof-title {
@@ -310,8 +294,30 @@
     }
 
     /* ── Chord notes ── */
+    #chord-notes-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
     #chord-notes {
       display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 4px 0;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+    }
+
+    #chord-trans-arrow {
+      font-size: 22px;
+      opacity: 0.6;
+      line-height: 1;
+    }
+
+    #chord-trans-notes {
       flex-wrap: wrap;
       gap: 8px;
       padding: 4px 0;
@@ -337,10 +343,17 @@
       border-radius: 6px;
       padding: 20px 24px;
       min-width: 300px;
+      font-size: 16px;
+    }
+    .modal-content label,
+    .modal-content select,
+    .modal-content input,
+    .modal-content button {
+      font-size: 16px;
     }
     .modal-title {
       font-weight: 600;
-      font-size: 15px;
+      font-size: 18px;
       margin-bottom: 16px;
     }
     .modal-body {
@@ -354,98 +367,88 @@
       justify-content: flex-end;
     }
     .modal-footer button {
-      padding: 4px 18px;
+      padding: 6px 22px;
     }
   </style>
 </head>
 <body>
 
 <div id="controls">
-  <div id="right-panel">
-    <div id="scale-mode-row">
-      <div id="scale-controls">
-        <div class="control-row">
-          <label>Tonic</label>
-          <select id="tonic" style="width:120px"></select>
-        </div>
-        <div class="control-row">
-          <label>Scale</label>
-          <select id="scale" style="width:300px"></select>
-        </div>
-        <div class="control-row">
-          <label>Mode</label>
-          <select id="mode" style="width:300px"></select>
-          <span id="skip-pattern"></span>
-        </div>
-      </div>
+  <div id="scale-controls">
+    <div class="control-row">
+      <label>Tonic</label>
+      <select id="tonic" style="width:120px"></select>
     </div>
-    <div style="height:8px"></div>
-    <div id="chord-area">
-      <div id="chord-buttons"></div>
-      <div class="trans-section" id="relative-keys">
-        <div class="trans-section-label">Relative keys:</div>
-        <div class="rel-key-row">
-          <span class="rel-key-label">Relative major</span>
-          <span id="rel-major-value" class="rel-key-value"></span>
-        </div>
-        <div class="rel-key-row">
-          <span class="rel-key-label">Relative minor</span>
-          <span id="rel-minor-value" class="rel-key-value"></span>
-        </div>
-      </div>
-      <div class="trans-section" id="tonic-alterations">
-        <div class="trans-section-label">Tonic alterations:</div>
-        <div class="chord-row">
-          <span class="trans-label">Neapolitan (♭II)</span>
-          <button class="trans-btn" id="tonic-alt-b2"></button>
-        </div>
-        <div class="chord-row">
-          <span class="trans-label">♭III</span>
-          <button class="trans-btn" id="tonic-alt-b3"></button>
-        </div>
-        <div class="chord-row">
-          <span class="trans-label">Minor subdominant (iv)</span>
-          <button class="trans-btn" id="tonic-alt-iv"></button>
-        </div>
-        <div class="chord-row">
-          <span class="trans-label">♭VI</span>
-          <button class="trans-btn" id="tonic-alt-b6"></button>
-        </div>
-        <div class="chord-row">
-          <span class="trans-label">Subtonic (♭VII)</span>
-          <button class="trans-btn" id="tonic-alt-b7"></button>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <div id="chord-notes"></div>
-        <div class="trans-section" id="chord-transitions" style="visibility:hidden">
-        <div class="trans-section-label">Common out-of-key chord transitions:</div>
-        <div class="chord-row">
-          <span class="trans-label">Secondary dominant</span>
-          <button class="trans-btn" id="trans-sec-dom"></button>
-        </div>
-        <div class="chord-row">
-          <span class="trans-label">Chromatic mediant (m3)</span>
-          <button class="trans-btn" id="trans-med-up-m3"></button>
-          <button class="trans-btn" id="trans-med-dn-m3"></button>
-        </div>
-        <div class="chord-row">
-          <span class="trans-label">Chromatic mediant (M3)</span>
-          <button class="trans-btn" id="trans-med-up-M3"></button>
-          <button class="trans-btn" id="trans-med-dn-M3"></button>
-        </div>
-        </div>
-      </div>
-      <div class="trans-section" id="borrowed-chords" style="visibility:hidden">
-        <div class="trans-section-label">Borrowed chords:</div>
-        <div id="borrowed-chord-rows"></div>
-      </div>
+    <div class="control-row">
+      <label>Scale</label>
+      <select id="scale" style="width:300px"></select>
+    </div>
+    <div class="control-row">
+      <label>Mode</label>
+      <select id="mode" style="width:300px"></select>
+      <span id="skip-pattern"></span>
     </div>
   </div>
   <div id="cof-container">
     <div id="circle-of-fifths"></div>
   </div>
-  <button id="settings-btn" title="Settings">⚙</button>
+  <div id="chord-buttons-area">
+    <div id="chord-buttons"></div>
+    <div class="trans-section" id="tonic-alterations">
+      <div class="trans-section-label">Tonic alterations:</div>
+      <div class="chord-row">
+        <span class="trans-label">Neapolitan (♭II)</span>
+        <button class="trans-btn" id="tonic-alt-b2"></button>
+      </div>
+      <div class="chord-row">
+        <span class="trans-label">♭III</span>
+        <button class="trans-btn" id="tonic-alt-b3"></button>
+      </div>
+      <div class="chord-row">
+        <span class="trans-label">Minor subdominant (iv)</span>
+        <button class="trans-btn" id="tonic-alt-iv"></button>
+      </div>
+      <div class="chord-row">
+        <span class="trans-label">♭VI</span>
+        <button class="trans-btn" id="tonic-alt-b6"></button>
+      </div>
+      <div class="chord-row">
+        <span class="trans-label">Subtonic (♭VII)</span>
+        <button class="trans-btn" id="tonic-alt-b7"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="settings-btn" title="Settings">⚙</button>
+
+<div id="chord-info-row">
+  <div id="chord-notes-area">
+    <div id="chord-notes"></div>
+    <div id="chord-trans-arrow" style="display:none">↓</div>
+    <div id="chord-trans-notes" style="display:none"></div>
+  </div>
+  <div class="trans-section" id="chord-transitions" style="visibility:hidden">
+    <div class="trans-section-label">Common out-of-key chord transitions:</div>
+    <div class="chord-row">
+      <span class="trans-label">Secondary dominant</span>
+      <button class="trans-btn" id="trans-sec-dom"></button>
+    </div>
+    <div class="chord-row">
+      <span class="trans-label">Chromatic mediant (m3)</span>
+      <button class="trans-btn" id="trans-med-up-m3"></button>
+      <button class="trans-btn" id="trans-med-dn-m3"></button>
+    </div>
+    <div class="chord-row">
+      <span class="trans-label">Chromatic mediant (M3)</span>
+      <button class="trans-btn" id="trans-med-up-M3"></button>
+      <button class="trans-btn" id="trans-med-dn-M3"></button>
+    </div>
+  </div>
+  <div class="trans-section" id="borrowed-chords" style="visibility:hidden">
+    <div class="trans-section-label">Borrowed chords:</div>
+    <div id="borrowed-chord-rows"></div>
+  </div>
 </div>
 
 <div id="fretboard"></div>
@@ -460,10 +463,16 @@
       <select id="theme-select" style="width:140px"></select>
     </div>
     <div class="modal-body">
-      <label for="num-strings">Strings</label>
-      <select id="num-strings" style="width:100px"></select>
+      <label for="tuning-select">Tuning</label>
+      <select id="tuning-select" style="width:360px"></select>
     </div>
-    <div id="string-inputs" style="margin-bottom:16px"></div>
+    <div id="custom-tuning-section">
+      <div class="modal-body">
+        <label for="num-strings">Strings</label>
+        <select id="num-strings" style="width:100px"></select>
+      </div>
+      <div id="string-inputs" style="margin-bottom:16px"></div>
+    </div>
     <div class="modal-footer">
       <button id="close-preferences-btn">Close</button>
     </div>

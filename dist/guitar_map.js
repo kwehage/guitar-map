@@ -85,27 +85,27 @@ const MODES = {
     { label: '2: Locrian ♮6',                   value: 1, title: '2: Locrian ♮6' },
     { label: '3: Ionian #6 (Augmented major)',   value: 2, title: '3: Ionian #6 (Augmented major)' },
     { label: '4: Ukrainian Dorian',              value: 3, title: '4: Ukrainian Dorian (Dorian #11, Romanian Minor, Nikriz, Mi Sheberakh)' },
-    { label: '5: Phrygian Dominant',             value: 4, title: '5: Phrygian Dominant (Hijaz, Double Harmonic Major b7, Freygish)' },
+    { label: '5: Phrygian Dominant',             value: 4, title: '5: Phrygian Dominant (Hijaz, Double Harmonic Major ♭7, Freygish)' },
     { label: '6: Lydian #9',                     value: 5, title: '6: Lydian #9' },
-    { label: '7: Super Locrian bb7',             value: 6, title: '7: Super Locrian bb7 (Altered Diminished, Ultralocrian)' },
+    { label: '7: Super Locrian ♭♭7',             value: 6, title: '7: Super Locrian ♭♭7 (Altered Diminished, Ultralocrian)' },
   ],
   '2122221': [
     { label: '1: Melodic minor (Jazz minor)',    value: 0, title: '1: Melodic minor (Jazz minor)' },
-    { label: '2: Dorian b2 (Phrygian #6)',       value: 1, title: '2: Dorian b2 (Phrygian #6)' },
+    { label: '2: Dorian ♭2 (Phrygian #6)',       value: 1, title: '2: Dorian ♭2 (Phrygian #6)' },
     { label: '3: Lydian Augmented',              value: 2, title: '3: Lydian Augmented' },
     { label: '4: Lydian Dominant (Overtone)',    value: 3, title: '4: Lydian Dominant (Overtone Scale)' },
-    { label: '5: Mixolydian b6',                 value: 4, title: '5: Mixolydian b6' },
-    { label: '6: Aeolian b5 (Locrian #2)',       value: 5, title: '6: Aeolian b5 (Locrian #2)' },
+    { label: '5: Mixolydian ♭6',                 value: 4, title: '5: Mixolydian ♭6' },
+    { label: '6: Aeolian ♭5 (Locrian #2)',       value: 5, title: '6: Aeolian ♭5 (Locrian #2)' },
     { label: '7: Altered Scale (Super Locrian)', value: 6, title: '7: Altered Scale (Super Locrian)' },
   ],
   '2131131': [
     { label: 'Double Harmonic Minor (Hungarian Minor)', value: 0, title: 'Double Harmonic Minor (Hungarian Minor)' },
     { label: 'Oriental',                               value: 1, title: 'Oriental' },
     { label: 'Ionian ♯2 ♯5',                           value: 2, title: 'Ionian ♯2 ♯5' },
-    { label: 'Locrian bb3 bb7',                        value: 3, title: 'Locrian bb3 bb7' },
+    { label: 'Locrian ♭♭3 ♭♭7',                        value: 3, title: 'Locrian ♭♭3 ♭♭7' },
     { label: 'Double harmonic major',                  value: 4, title: 'Double harmonic major (Phrygian Dominant #7)' },
     { label: 'Lydian #2 #6',                           value: 5, title: 'Lydian #2 #6' },
-    { label: 'Ultraphrygian',                          value: 6, title: 'Ultraphrygian (Phrygian b4 bb7)' },
+    { label: 'Ultraphrygian',                          value: 6, title: 'Ultraphrygian (Phrygian ♭4 ♭♭7)' },
   ],
   '22323': [
     { label: '1: Pentatonic Major',      value: 0, title: '1: Pentatonic Major (Ionian Pentatonic)' },
@@ -469,6 +469,52 @@ function diatonicChordToneName(rootNote, rootDiatonicLetter, intervalSemitones, 
   return rootNote.match(/^[A-G]#?/)[0];
 }
 
+// ── Preset tunings ────────────────────────────────────────────────────────────
+// strings array is high-to-low (string 1 = highest/thinnest)
+
+const TUNINGS = [
+  // 4-string bass
+  { label: '4 String - Bass Standard - E1, A1, D2, G2',   n: 4, s: ['G2','D2','A1','E1'] },
+  { label: '4 String - Bass Drop D - D1, A1, D2, G2',     n: 4, s: ['G2','D2','A1','D1'] },
+  { label: '4 String - Bass Drop C - C1, G1, C2, F2',     n: 4, s: ['F2','C2','G1','C1'] },
+  { label: '4 String - Bass Drop B - B0, F#1, B1, E2',    n: 4, s: ['E2','B1','F#1','B0'] },
+  // 5-string bass
+  { label: '5 String - Bass Standard - B0, E1, A1, D2, G2', n: 5, s: ['G2','D2','A1','E1','B0'] },
+  { label: '5 String - Bass Drop A - A0, E1, A1, D2, G2',   n: 5, s: ['G2','D2','A1','E1','A0'] },
+  // 6-string guitar
+  { label: '6 String - E Standard - E2, A2, D3, G3, B3, E4',        n: 6, s: ['E4','B3','G3','D3','A2','E2'] },
+  { label: '6 String - Drop D - D2, A2, D3, G3, B3, E4',            n: 6, s: ['E4','B3','G3','D3','A2','D2'] },
+  { label: '6 String - Double Drop D - D2, A2, D3, G3, B3, D4',     n: 6, s: ['D4','B3','G3','D3','A2','D2'] },
+  { label: '6 String - Eb Standard - Eb2, Ab2, Db3, Gb3, Bb3, Eb4', n: 6, s: ['Eb4','Bb3','Gb3','Db3','Ab2','Eb2'] },
+  { label: '6 String - D Standard - D2, G2, C3, F3, A3, D4',        n: 6, s: ['D4','A3','F3','C3','G2','D2'] },
+  { label: '6 String - Drop C - C2, G2, C3, F3, A3, D4',            n: 6, s: ['D4','A3','F3','C3','G2','C2'] },
+  { label: '6 String - C# Standard - C#2, F#2, B2, E3, G#3, C#4',  n: 6, s: ['C#4','G#3','E3','B2','F#2','C#2'] },
+  { label: '6 String - Drop B - B1, F#2, B2, E3, G#3, C#4',         n: 6, s: ['C#4','G#3','E3','B2','F#2','B1'] },
+  { label: '6 String - B Standard - B1, E2, A2, D3, F#3, B3',       n: 6, s: ['B3','F#3','D3','A2','E2','B1'] },
+  { label: '6 String - Drop A - A1, E2, A2, D3, F#3, B3',           n: 6, s: ['B3','F#3','D3','A2','E2','A1'] },
+  { label: '6 String - DADGAD - D2, A2, D3, G3, A3, D4',            n: 6, s: ['D4','A3','G3','D3','A2','D2'] },
+  { label: '6 String - Open E - E2, B2, E3, G#3, B3, E4',           n: 6, s: ['E4','B3','G#3','E3','B2','E2'] },
+  { label: '6 String - Open D - D2, A2, D3, F#3, A3, D4',           n: 6, s: ['D4','A3','F#3','D3','A2','D2'] },
+  { label: '6 String - Open G - D2, G2, D3, G3, B3, D4',            n: 6, s: ['D4','B3','G3','D3','G2','D2'] },
+  { label: '6 String - Open A - E2, A2, E3, A3, C#4, E4',           n: 6, s: ['E4','C#4','A3','E3','A2','E2'] },
+  { label: '6 String - Open C - C2, G2, C3, G3, C4, E4',            n: 6, s: ['E4','C4','G3','C3','G2','C2'] },
+  // 7-string guitar
+  { label: '7 String - B Standard - B1, E2, A2, D3, G3, B3, E4', n: 7, s: ['E4','B3','G3','D3','A2','E2','B1'] },
+  { label: '7 String - Drop A - A1, E2, A2, D3, G3, B3, E4',     n: 7, s: ['E4','B3','G3','D3','A2','E2','A1'] },
+  // 8-string guitar
+  { label: '8 String - F# Standard - F#1, B1, E2, A2, D3, G3, B3, E4', n: 8, s: ['E4','B3','G3','D3','A2','E2','B1','F#1'] },
+  { label: '8 String - Drop E - E1, B1, E2, A2, D3, G3, B3, E4',       n: 8, s: ['E4','B3','G3','D3','A2','E2','B1','E1'] },
+  { label: '8 String - Mirar - E1, B1, C2, E2, B2, E3, B3, C4',        n: 8, s: ['C4','B3','E3','B2','E2','C2','B1','E1'] },
+];
+
+function detectCurrentTuning() {
+  for (const t of TUNINGS) {
+    if (t.n !== state.numStrings) continue;
+    if (t.s.every((s, i) => state.strings[i] === s)) return t.label;
+  }
+  return 'custom';
+}
+
 // ── Settings (localStorage) ───────────────────────────────────────────────────
 
 const STORAGE_KEY = 'guitar_map_settings';
@@ -498,6 +544,7 @@ const state = {
   mode:  saved?.mode  ?? 0,
   theme: saved?.theme ?? 'light',
   activeChord: null,
+  baseAltChord: null,
   transitionChord: null,
   selectedVoicing: null,
 };
@@ -684,7 +731,7 @@ function navigateToCofKey(cofPos, quality) {
     state.tonic = NOTE_NAMES[COF_POS_MINOR_SEM[cofPos]];
     state.mode  = 5; // Aeolian
   }
-  state.activeChord = null; state.transitionChord = null; state.selectedVoicing = null;
+  state.activeChord = null; state.baseAltChord = null; state.transitionChord = null; state.selectedVoicing = null;
   document.getElementById('tonic').value = state.tonic;
   document.getElementById('scale').value = state.scale;
   persistState();
@@ -804,32 +851,6 @@ function renderSkipPattern() {
   el.textContent = labels.join(' – ');
 }
 
-function renderRelativeKeys() {
-  const quality = SCALE_QUALITY[state.scale];
-  const parentRoot = parentScaleRoot(state.tonic, state.scale, state.mode);
-
-  if (quality === null) {
-    document.getElementById('rel-major-value').textContent = '—';
-    document.getElementById('rel-minor-value').textContent = '—';
-    return;
-  }
-
-  // For major-quality scales mode 1 is the major root; minor is 9 semitones up.
-  // For minor-quality scales mode 1 is the minor root; major is 3 semitones up.
-  const majRoot = quality === 'major' ? parentRoot : transposeNote(parentRoot, 3);
-  const minRoot = quality === 'major' ? transposeNote(parentRoot, 9) : parentRoot;
-
-  const majRootName = majRoot.match(/^[A-G](#|b)?/)[0];
-  const useFlats = FLAT_TONIC_NAMES.has(majRootName);
-
-  const majDisplay = useFlats ? (SHARP_TO_FLAT[majRootName] || majRootName) : majRootName;
-  const minRootName = minRoot.match(/^[A-G](#|b)?/)[0];
-  const minDisplay = useFlats ? (SHARP_TO_FLAT[minRootName] || minRootName) : minRootName;
-
-  document.getElementById('rel-major-value').textContent = displayNote(majDisplay) + ' major';
-  document.getElementById('rel-minor-value').textContent = displayNote(minDisplay) + ' minor';
-}
-
 // ── Mode dropdown ─────────────────────────────────────────────────────────────
 
 function renderModeDropdown() {
@@ -893,7 +914,6 @@ function renderTransitions() {
 
 const TRANSITION_IDS = [
   'trans-sec-dom','trans-med-up-m3','trans-med-dn-m3','trans-med-up-M3','trans-med-dn-M3',
-  'tonic-alt-b2','tonic-alt-b3','tonic-alt-iv','tonic-alt-b6','tonic-alt-b7',
 ];
 
 const TONIC_ALTERATIONS = [
@@ -985,6 +1005,7 @@ function renderBorrowedChords() {
       renderTonicAlterations();
       renderBorrowedChords();
       renderChordNotes();
+      renderTransitionNotes();
       renderFretboard();
     });
 
@@ -1027,7 +1048,8 @@ function renderTonicAlterations() {
     const rootNote = transposeNote(notesInScale[0], alt.semitones);
     const chordNotes = CHORD_INTERVALS[alt.type].map(iv => transposeNote(rootNote, iv));
     const isDiatonic = chordNotes.every(n => notesInScale.some(sn => isOctaveOfNote(n, sn)));
-    const isActive = state.transitionChord?.badgeId === alt.id;
+    const isActive = state.baseAltChord?.badgeId === alt.id;
+    btn.classList.toggle('active',    isActive);
     btn.classList.toggle('secondary', isDiatonic && !isActive);
   }
 }
@@ -1041,27 +1063,80 @@ function renderChordNotes() {
   const tc = THEMES[state.theme] || THEMES.light;
 
   let chordNotes = [], chordLabels = [], intervals = [], noteDisplayNames = [];
-  if (state.transitionChord) {
-    intervals        = state.transitionChord.intervals;
-    chordNotes       = intervals.map(iv => transposeNote(state.transitionChord.rootNote, iv));
-    chordLabels      = state.transitionChord.labels;
-    noteDisplayNames = chordNotes.map(n => noteName(n, useFlats));
-  } else if (state.activeChord) {
+  if (state.activeChord) {
     const [rowStr, chordType] = state.activeChord.split('-');
     const rowIdx = parseInt(rowStr) - 1;
     intervals   = CHORD_INTERVALS[chordType];
     chordNotes  = intervals.map(iv => transposeNote(notesInScale[rowIdx], iv));
     chordLabels = CHORD_INTERVAL_LABELS[chordType];
-    const diatonicNames    = diatonicNoteNames(state.tonic, state.scale, state.mode);
-    const rootLetter       = diatonicNames[rowIdx].match(/^[A-G]/)[0];
-    const rootNote         = notesInScale[rowIdx];
+    const diatonicNames = diatonicNoteNames(state.tonic, state.scale, state.mode);
+    const rootLetter    = diatonicNames[rowIdx].match(/^[A-G]/)[0];
+    const rootNote      = notesInScale[rowIdx];
     noteDisplayNames = intervals.map((iv, i) =>
       diatonicChordToneName(rootNote, rootLetter, iv, chordLabels[i])
     );
+  } else if (state.baseAltChord) {
+    intervals        = state.baseAltChord.intervals;
+    chordNotes       = intervals.map(iv => transposeNote(state.baseAltChord.rootNote, iv));
+    chordLabels      = state.baseAltChord.labels;
+    noteDisplayNames = chordNotes.map(n => noteName(n, useFlats));
   }
 
   if (!chordNotes.length) { container.style.display = 'none'; return; }
   container.style.display = 'flex';
+
+  const NS = 'http://www.w3.org/2000/svg';
+  for (let i = 0; i < chordNotes.length; i++) {
+    const color    = intervalColor(chordLabels[i]);
+    const noteDisp = displayNote(noteDisplayNames[i]);
+
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('width', '26'); svg.setAttribute('height', '26');
+
+    const circle = document.createElementNS(NS, 'circle');
+    circle.setAttribute('cx', '13'); circle.setAttribute('cy', '13');
+    circle.setAttribute('r', '12'); circle.setAttribute('fill', color);
+    svg.appendChild(circle);
+
+    const txt = document.createElementNS(NS, 'text');
+    txt.setAttribute('x', '13'); txt.setAttribute('y', '17');
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('font-size', '9');
+    txt.setAttribute('font-weight', 'bold');
+    txt.setAttribute('fill', tc.label_fill);
+    txt.textContent = noteDisp;
+    svg.appendChild(txt);
+
+    container.appendChild(svg);
+  }
+
+  const intervalRow = document.createElement('div');
+  intervalRow.style.cssText = 'width:100%; text-align:center; font-size:12px; opacity:0.65; padding-top:2px;';
+  intervalRow.textContent = '[' + intervals.join(', ') + ']';
+  container.appendChild(intervalRow);
+}
+
+function renderTransitionNotes() {
+  const arrow     = document.getElementById('chord-trans-arrow');
+  const container = document.getElementById('chord-trans-notes');
+  container.innerHTML = '';
+
+  const hasBase = state.activeChord || state.baseAltChord;
+  if (!hasBase || !state.transitionChord) {
+    arrow.style.display     = 'none';
+    container.style.display = 'none';
+    return;
+  }
+
+  arrow.style.display     = '';
+  container.style.display = 'flex';
+
+  const tc       = THEMES[state.theme] || THEMES.light;
+  const useFlats = shouldUseFlats(state.tonic, state.scale, state.mode);
+  const intervals        = state.transitionChord.intervals;
+  const chordNotes       = intervals.map(iv => transposeNote(state.transitionChord.rootNote, iv));
+  const chordLabels      = state.transitionChord.labels;
+  const noteDisplayNames = chordNotes.map(n => noteName(n, useFlats));
 
   const NS = 'http://www.w3.org/2000/svg';
   for (let i = 0; i < chordNotes.length; i++) {
@@ -1131,12 +1206,12 @@ function activateTransitionChord(badgeId, semitoneOffset, forcedType) {
   renderTonicAlterations();
   renderBorrowedChords();
   renderChordNotes();
+  renderTransitionNotes();
   renderFretboard();
 }
 
 function renderChordButtons() {
   renderSkipPattern();
-  renderRelativeKeys();
   const notesInScale  = buildScaleNotes(state.tonic, state.scale, state.mode);
   const diatonicNames = diatonicNoteNames(state.tonic, state.scale, state.mode);
 
@@ -1200,6 +1275,9 @@ function buildFretboardData() {
     const rowIdx = parseInt(rowStr) - 1;
     notesInChord = CHORD_INTERVALS[chordType].map(iv => transposeNote(notesInScale[rowIdx], iv));
     chordLabels = CHORD_INTERVAL_LABELS[chordType];
+  } else if (state.baseAltChord) {
+    notesInChord = state.baseAltChord.intervals.map(iv => transposeNote(state.baseAltChord.rootNote, iv));
+    chordLabels = state.baseAltChord.labels;
   }
 
   const traces = [];
@@ -1647,6 +1725,9 @@ function renderChordDiagrams() {
     const notesInScale = buildScaleNotes(state.tonic, state.scale, state.mode);
     notesInChord = CHORD_INTERVALS[chordType].map(iv => transposeNote(notesInScale[rowIdx], iv));
     chordLabels = CHORD_INTERVAL_LABELS[chordType];
+  } else if (state.baseAltChord) {
+    notesInChord = state.baseAltChord.intervals.map(iv => transposeNote(state.baseAltChord.rootNote, iv));
+    chordLabels = state.baseAltChord.labels;
   }
 
   container.innerHTML = '';
@@ -1737,6 +1818,7 @@ function applyLoadedSettings(data) {
 
   applyTheme();
   state.activeChord     = null;
+  state.baseAltChord    = null;
   state.transitionChord = null;
   state.selectedVoicing = null;
   persistState();
@@ -1784,6 +1866,7 @@ function buildChordButtonGrid() {
       const chordKey = `${i+1}-${CHORD_TYPES[j]}`;
       btn.addEventListener('click', () => {
         state.activeChord     = state.activeChord === chordKey ? null : chordKey;
+        state.baseAltChord    = null;
         state.transitionChord = null;
         state.selectedVoicing = null;
         updateActiveChordButton();
@@ -1792,6 +1875,7 @@ function buildChordButtonGrid() {
         renderTonicAlterations();
         renderBorrowedChords();
         renderChordNotes();
+        renderTransitionNotes();
         renderFretboard();
       });
 
@@ -1822,7 +1906,11 @@ function buildStringInputs() {
       const v = input.value.trim();
       if (/^[A-G](?:b|#)?(?:[0-9]|10)$/.test(v)) {
         state.strings[i-1] = v;
-        state.activeChord = null;
+        const ts = document.getElementById('tuning-select');
+        if (ts) ts.value = 'custom';
+        state.activeChord     = null;
+        state.baseAltChord    = null;
+        state.transitionChord = null;
         state.selectedVoicing = null;
         persistState();
         renderChordButtons();
@@ -1854,6 +1942,47 @@ function init() {
     scaleSel.appendChild(el);
   }
   scaleSel.value = state.scale;
+
+  // Tuning select
+  const tuningSel = document.getElementById('tuning-select');
+  for (const t of TUNINGS) {
+    const el = document.createElement('option');
+    el.value = t.label; el.textContent = t.label;
+    tuningSel.appendChild(el);
+  }
+  const customOpt = document.createElement('option');
+  customOpt.value = 'custom'; customOpt.textContent = 'Custom';
+  tuningSel.appendChild(customOpt);
+  tuningSel.value = detectCurrentTuning();
+
+  function syncCustomSection() {
+    const isCustom = tuningSel.value === 'custom';
+    document.getElementById('custom-tuning-section').style.display = isCustom ? '' : 'none';
+  }
+  syncCustomSection();
+
+  tuningSel.addEventListener('change', () => {
+    if (tuningSel.value === 'custom') {
+      syncCustomSection();
+      return;
+    }
+    const preset = TUNINGS.find(t => t.label === tuningSel.value);
+    if (!preset) return;
+    state.numStrings = preset.n;
+    for (let i = 0; i < preset.s.length; i++) state.strings[i] = preset.s[i];
+    numStrSel.value = state.numStrings;
+    for (let i = 1; i <= 10; i++) {
+      const inp = document.getElementById(`string-${i}`);
+      if (inp) inp.value = state.strings[i - 1];
+    }
+    syncCustomSection();
+    state.activeChord = null; state.baseAltChord = null;
+    state.transitionChord = null; state.selectedVoicing = null;
+    persistState();
+    renderStringVisibility();
+    renderChordButtons();
+    renderFretboard();
+  });
 
   // Num strings
   const numStrSel = document.getElementById('num-strings');
@@ -1892,11 +2021,13 @@ function init() {
   for (const alt of TONIC_ALTERATIONS) {
     document.getElementById(alt.id).addEventListener('click', () => {
       state.selectedVoicing = null;
-      if (state.transitionChord?.badgeId === alt.id) {
-        state.transitionChord = null;
+      if (state.baseAltChord?.badgeId === alt.id) {
+        state.baseAltChord = null;
       } else {
+        state.activeChord     = null;
+        state.transitionChord = null;
         const notesInScale = buildScaleNotes(state.tonic, state.scale, state.mode);
-        state.transitionChord = {
+        state.baseAltChord = {
           badgeId: alt.id,
           rootNote: transposeNote(notesInScale[0], alt.semitones),
           intervals: CHORD_INTERVALS[alt.type],
@@ -1905,8 +2036,11 @@ function init() {
       }
       updateActiveChordButton();
       updateTransitionButtons();
+      renderTransitions();
       renderTonicAlterations();
+      renderBorrowedChords();
       renderChordNotes();
+      renderTransitionNotes();
       renderFretboard();
     });
   }
@@ -1919,7 +2053,9 @@ function init() {
   // Controls
   numStrSel.addEventListener('change', () => {
     state.numStrings = parseInt(numStrSel.value);
+    tuningSel.value = 'custom';
     state.activeChord     = null;
+    state.baseAltChord    = null;
     state.transitionChord = null;
     state.selectedVoicing = null;
     persistState();
@@ -1931,6 +2067,7 @@ function init() {
   tonicSel.addEventListener('change', () => {
     state.tonic = tonicSel.value;
     state.activeChord     = null;
+    state.baseAltChord    = null;
     state.transitionChord = null;
     state.selectedVoicing = null;
     persistState();
@@ -1942,6 +2079,7 @@ function init() {
     state.scale = scaleSel.value;
     state.mode = MODES[state.scale][0].value;
     state.activeChord     = null;
+    state.baseAltChord    = null;
     state.transitionChord = null;
     state.selectedVoicing = null;
     persistState();
@@ -1953,6 +2091,7 @@ function init() {
   document.getElementById('mode').addEventListener('change', e => {
     state.mode = parseInt(e.target.value);
     state.activeChord     = null;
+    state.baseAltChord    = null;
     state.transitionChord = null;
     state.selectedVoicing = null;
     persistState();
@@ -1965,12 +2104,17 @@ function init() {
     applyTheme();
     persistState();
     renderChordNotes();
+    renderTransitionNotes();
     renderFretboard();
     renderCircleOfFifths();
   });
 
   // Preferences modal — opened by the Electron menu (hidden btn) or the visible gear button
-  const openPreferences = () => document.getElementById('preferences-modal').classList.remove('hidden');
+  const openPreferences = () => {
+    tuningSel.value = detectCurrentTuning();
+    syncCustomSection();
+    document.getElementById('preferences-modal').classList.remove('hidden');
+  };
   document.getElementById('open-preferences-btn').addEventListener('click', openPreferences);
   document.getElementById('settings-btn').addEventListener('click', openPreferences);
   document.getElementById('close-preferences-btn').addEventListener('click', () =>
