@@ -1906,6 +1906,10 @@ function bindFretboardClick() {
       e.preventDefault();
       const touch = e.changedTouches && e.changedTouches[0];
       if (touch) handleFretboardClick({ clientX: touch.clientX, clientY: touch.clientY });
+      // Touch has no "move the mouse away" gesture to dismiss Plotly's hover
+      // label, so clear it ourselves once the tap lifts — note selection is
+      // separate state (clickedPositions) and is unaffected by this.
+      if (window.Plotly && Plotly.Fx && Plotly.Fx.unhover) Plotly.Fx.unhover(div);
     }, { passive: false });
     div._clickHandlerBound = true;
   }
