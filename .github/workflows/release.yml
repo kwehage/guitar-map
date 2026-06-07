@@ -38,7 +38,46 @@ jobs:
       - name: Copy Plotly.js to dist
         run: npm run prebuild
 
-      - name: Publish binaries
-        run: npm run publish
+      - name: Build binaries and save publish metadata (dry run)
+        run: npm run publish:dry-run
+
+      - name: Upload platform artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os.name }}
+          path: out/
+          if-no-files-found: error
+
+  # electron-forge's GitHub publisher isn't safe to run concurrently against
+  # the same release — three matrix jobs publishing in parallel race to
+  # create/update it and clobber each other, leaving an empty release behind.
+  # So each OS job above only builds (--dry-run saves the made artifacts plus
+  # publish metadata under out/), and this single job downloads every
+  # platform's output and publishes them all together in one pass.
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: out
+          pattern: build-*
+          merge-multiple: true
+
+      - name: Publish all platform binaries from saved dry runs
+        run: npm run publish:from-dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
