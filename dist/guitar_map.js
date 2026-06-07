@@ -1891,6 +1891,17 @@ function handleFretboardClick(e) {
   if (fig) Plotly.react('fretboard', fig.traces, fig.layout, { displayModeBar:false, responsive:true });
 }
 
+function clearFretboardHover() {
+  const div = document.getElementById('fretboard');
+  if (!div) return;
+  if (window.Plotly && Plotly.Fx && Plotly.Fx.unhover) {
+    try { Plotly.Fx.unhover(div); } catch (err) { /* ignore */ }
+  }
+  // Belt-and-suspenders: on touch devices Plotly's hover labels can persist
+  // as orphaned SVG nodes even after Fx.unhover runs — strip them directly.
+  div.querySelectorAll('.hoverlayer').forEach(layer => { layer.innerHTML = ''; });
+}
+
 function bindFretboardClick() {
   const div = document.getElementById('fretboard');
   if (div && !div._clickHandlerBound) {
@@ -1906,11 +1917,13 @@ function bindFretboardClick() {
       e.preventDefault();
       const touch = e.changedTouches && e.changedTouches[0];
       if (touch) handleFretboardClick({ clientX: touch.clientX, clientY: touch.clientY });
-      // Touch has no "move the mouse away" gesture to dismiss Plotly's hover
-      // label, so clear it ourselves once the tap lifts — note selection is
-      // separate state (clickedPositions) and is unaffected by this.
-      if (window.Plotly && Plotly.Fx && Plotly.Fx.unhover) Plotly.Fx.unhover(div);
+      clearFretboardHover();
     }, { passive: false });
+    // Touch has no "move the mouse away" gesture to dismiss Plotly's hover
+    // label, so a stale label can keep sitting on the last-tapped note. Clear
+    // it the moment the user touches anywhere else in the UI — note selection
+    // is separate state (clickedPositions) and is unaffected by this.
+    document.addEventListener('touchstart', clearFretboardHover, { passive: true, capture: true });
     div._clickHandlerBound = true;
   }
 }
