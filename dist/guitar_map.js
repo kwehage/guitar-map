@@ -1895,6 +1895,18 @@ function bindFretboardClick() {
   const div = document.getElementById('fretboard');
   if (div && !div._clickHandlerBound) {
     div.addEventListener('click', handleFretboardClick);
+    // On touch devices, Plotly's hover tooltip still shows on tap (desired —
+    // it's how a touch user sees the note label), but the synthetic "ghost
+    // click" that follows a touch fires too late / gets swallowed by Plotly's
+    // hover handling, so the click listener above never selects the note.
+    // Drive selection directly from touchend, then preventDefault there only
+    // (after the hover has already been triggered by touchstart/touchmove)
+    // to suppress that ghost click so the toggle doesn't fire twice.
+    div.addEventListener('touchend', e => {
+      e.preventDefault();
+      const touch = e.changedTouches && e.changedTouches[0];
+      if (touch) handleFretboardClick({ clientX: touch.clientX, clientY: touch.clientY });
+    }, { passive: false });
     div._clickHandlerBound = true;
   }
 }
