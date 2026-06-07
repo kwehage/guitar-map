@@ -11,15 +11,21 @@ The tool allows you to configure:
 From those inputs it displays:
 * A fretboard diagram with every position labelled — hover over any position to see the note name and frequency in Hz.
 * All notes in the scale highlighted with circles; the tonic of the current mode is shown in black.
-* All diatonic chord voicings for the scale; click a chord to highlight every matching position on the fretboard.
+* All diatonic chords for the scale; click a chord to display every matching position on the fretboard.
 * **Chord notes**: when a chord is selected, its notes are displayed as labeled / color-coded "chips". Clicking a tonic alteration chord (Neapolitan, ♭III, iv, ♭VI, ♭VII) shows its notes the same way.
 * **Chord transition display**: when a transition or borrowed chord is also selected, a ↓ arrow appears and a second row of chips shows the notes of the target chord, making it easy to see voice-leading between two chords.
 * For each chord, common out-of-key transitions: secondary dominant, chromatic mediants (major and minor third up and down).
 * Borrowed chord suggestions from parallel modes of the same scale.
-* Tonic alteration chords: Neapolitan (♭II), ♭III, minor subdominant (iv), ♭VI, and subtonic (♭VII).
+* Tonic alteration chords: Neapolitan (♭II), ♭III, minor subdominant (iv), ♭VI, and subtonic (♭VII). If any of the altered chords are diatonic to the selected scale (e.g. they already show up in the list of diatonic chords, they will render as greyed out -- they don't actually alter the key for the given scale/mode selected).
 * A **Circle of Fifths** diagram that highlights the active key, shows the relative major/minor relationship, and displays the standard diatonic key signature — treble clef, sharps, and flats — for all twelve keys around the perimeter.
+* **Click-to-identify chords**: when no chord is selected, click directly on the fretboard to pick out notes — one selection per string; clicking a different position on a string replaces the previous choice, and clicking the same position again clears it. Once three or more notes are selected, Guitar Map works out every chord that matches them, testing each note as a possible root so inversions are recognized too (shown in slash notation, e.g. `C/E`), and displays the result centered above the diagram. Picking a chord from the chord list clears the click selection.
 
-Settings (tuning preset, tonic, scale, mode, and theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open** (note this feature is only supported on the Electron desktop app).
+Settings (tuning preset, tonic, scale, mode, and color theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open** (note this feature is only supported on the Electron desktop app).
+
+**Color Theme** (set in **⚙ Preferences → Color Theme**) changes the look of the fretboard, chord diagrams, Circle of Fifths, and surrounding interface. Three themes are available:
+* **Light Jazz** — a clean, bright theme with crisp black-on-white contrast, luminous and expressive.
+* **Blues** — a cool, low-contrast dark theme in deep indigo and periwinkle, evoking twilight skies over the Mississippi Delta — the birthplace of the blues.
+* **Black Metal** — an evil, stark black-and-red theme with its own dissonance color palette dominated by embers, oxblood, and crimson — with a sickly acid green and a frostbitten ash-blue reserved for the harshest dissonances (the minor second and the tritone) so the "wrong" notes visually recoil.
 
 ![fretboard](doc/fretboard.png)
 
@@ -47,7 +53,7 @@ Once installed, the app opens in its own window without browser chrome and cache
 
 ### Option 2 — Electron desktop app
 
-If you prefer a native desktop window without a browser, Guitar Map is also  packaged as an Electron application.
+If you prefer a native desktop window without a browser, Guitar Map is also packaged as an Electron application.
 
 #### Prebuilt binaries
 

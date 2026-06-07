@@ -36,6 +36,24 @@ const INTERVAL_COLORS = [
   '#E08030',  // 10 m7         – orange (dominant tension)
   '#E04040',  // 11 M7         – coral red (leading tone)
 ];
+// "Black Metal" palette: red-dominated and grounded in the dark, with two
+// deliberate outsiders — a sickly acid green and a frostbitten ash-blue — placed
+// on the harshest dissonances (m2, tritone) so the "wrong" notes visually recoil
+// against the surrounding embers and oxblood, evoking corpse paint on a pyre.
+const BLACK_METAL_INTERVAL_COLORS = [
+  '#B8001F',  // 0  root       – blood red (the anchor)
+  '#7FBF3F',  // 1  m2         – sickly acid green (poisoned half-step)
+  '#E8581C',  // 2  M2 / 9th  – ember orange (smoldering coal)
+  '#8B1A1A',  // 3  m3         – dried-blood crimson (brooding minor)
+  '#FF2E2E',  // 4  M3         – searing scarlet (major brightness on black)
+  '#A6431F',  // 5  P4 / 11th – burnt rust
+  '#7C98A6',  // 6  tritone    – frostbitten ash-blue (Diabolus in Musica, corpse-cold)
+  '#7A0000',  // 7  P5         – oxblood (deeper than root, foundational)
+  '#7A1453',  // 8  m6 / A5   – bruised plum-violet (shadowed unease)
+  '#C4711F',  // 9  M6 / bb7  – charred amber
+  '#FF5C1A',  // 10 m7         – molten orange (dominant fire)
+  '#FF0844',  // 11 M7         – neon blood (searing leading tone)
+];
 // Compound intervals (9th, 11th, 13th) fold back mod 12 for coloring.
 const INTERVAL_LABEL_SEMITONES = {
   'R': 0, '2': 2, 'm3': 3, '3': 4, '4': 5,
@@ -43,21 +61,41 @@ const INTERVAL_LABEL_SEMITONES = {
   'm7': 10, '7': 11, '9': 2, '11': 5, '13': 9,
 };
 function intervalColor(label) {
-  return INTERVAL_COLORS[INTERVAL_LABEL_SEMITONES[label] ?? 0];
+  const tc = THEMES[state.theme] || THEMES.light;
+  const palette = tc.interval_colors || INTERVAL_COLORS;
+  return palette[INTERVAL_LABEL_SEMITONES[label] ?? 0];
 }
 
 const THEMES = {
   light: {
+    label: 'Light Jazz', is_dark: false,
     bg: 'white', line: 'black',
     root_fill: 'rgba(0,0,0,0.8)', scale_fill: 'rgba(0,0,0,0.1)',
     base_fill: 'rgba(255,255,255,0.3)', annotation: 'black', label_fill: '#ffffff',
     midi_fill: 'rgba(240,200,30,0.9)',
+    click_fill: 'rgba(140,60,220,0.85)',
+    interval_colors: INTERVAL_COLORS,
+    cof: { inactive: '#f0f4f8', active_bg: '#c8deff', active_major: '#4B78C8', active_minor: '#7848C8' },
   },
   dark: {
+    label: 'Blues', is_dark: true,
     bg: '#1e1e2e', line: '#cdd6f4',
     root_fill: 'rgba(205,214,244,0.9)', scale_fill: 'rgba(205,214,244,0.15)',
     base_fill: 'rgba(0,0,0,0.3)', annotation: '#cdd6f4', label_fill: '#000000',
     midi_fill: 'rgba(240,200,30,0.85)',
+    click_fill: 'rgba(160,80,220,0.85)',
+    interval_colors: INTERVAL_COLORS,
+    cof: { inactive: '#252535', active_bg: '#1e3050', active_major: '#4B78C8', active_minor: '#7848C8' },
+  },
+  blackMetal: {
+    label: 'Black Metal', is_dark: true,
+    bg: '#000000', line: '#ffffff',
+    root_fill: 'rgba(255,255,255,0.9)', scale_fill: 'rgba(255,255,255,0.15)',
+    base_fill: 'rgba(0,0,0,0.5)', annotation: '#c9a0a0', label_fill: '#000000',
+    midi_fill: 'rgba(184,0,31,0.85)',
+    click_fill: 'rgba(255,46,46,0.85)',
+    interval_colors: BLACK_METAL_INTERVAL_COLORS,
+    cof: { inactive: '#1a0a0a', active_bg: '#3a0f0f', active_major: '#B8001F', active_minor: '#8B1A1A' },
   },
 };
 
@@ -216,6 +254,19 @@ const CHORD_INTERVAL_LABELS = {
   '13':   ['R','3','5','m7','9','11','13'],
   maj13:  ['R','3','5','7','9','11','13'],
   min13:  ['R','m3','5','m7','9','11','13'],
+};
+
+const CHORD_TYPE_DISPLAY = {
+  maj:'',    min:'m',  dim:'°',  aug:'+',
+  sus2:'sus2', sus4:'sus4',
+  '6':'6',   min6:'m6',
+  '7':'7',   maj7:'maj7', min7:'m7', mMaj7:'mMaj7',
+  dim7:'°7', m7b5:'ø7',  aug7:'+7', '7sus4':'7sus4',
+  add9:'add9', madd9:'madd9',
+  '9':'9',   maj9:'maj9', min9:'m9',
+  add11:'add11', madd11:'madd11',
+  '11':'11', maj11:'maj11', min11:'m11',
+  '13':'13', maj13:'maj13', min13:'m13',
 };
 
 const SCALE_QUALITY = {
@@ -587,6 +638,10 @@ function applyTheme() {
 let midiAccess = null;
 let midiOutputDevice = null;  // currently selected Web MIDI output port
 const midiActiveNotes = new Set(); // active MIDI note numbers (0–127)
+const clickedPositions = new Map(); // key="si,fi" (fi=0=open string), value=note name
+let _fretPositionsCache = [];
+let _stringPositionsRev = [];
+let _fretboardStateHash = '';
 
 let _midiRenderPending = false;
 function scheduleMidiRender() {
@@ -854,7 +909,6 @@ function renderCircleOfFifths() {
   if (!document.getElementById('circle-of-fifths')) return;
 
   const tc    = THEMES[state.theme] || THEMES.light;
-  const isDark = state.theme === 'dark';
 
   // Both rings have equal radial width (0.34 units each)
   const R_OUT   = 1.14;
@@ -865,10 +919,11 @@ function renderCircleOfFifths() {
 
   const { pos: activePos, isMajorFlavor } = getActiveCofPos();
 
-  const inactiveFill  = isDark ? '#252535' : '#f0f4f8';
-  const activeBg      = isDark ? '#1e3050' : '#c8deff';
-  const activeMajFill = '#4B78C8';
-  const activeMinFill = '#7848C8';
+  const cof           = tc.cof;
+  const inactiveFill  = cof.inactive;
+  const activeBg      = cof.active_bg;
+  const activeMajFill = cof.active_major;
+  const activeMinFill = cof.active_minor;
   const textCol       = tc.annotation;
   const activeTextCol = '#ffffff';
 
@@ -1354,6 +1409,10 @@ function renderChordNotes() {
     if (autoPlayRow) autoPlayRow.style.display = 'none';
     return;
   }
+  if (clickedPositions.size > 0) {
+    clickedPositions.clear();
+    renderClickedChordId();
+  }
   container.style.display = 'flex';
   if (autoPlayRow) autoPlayRow.style.display = 'flex';
 
@@ -1526,9 +1585,14 @@ function renderChordButtons() {
 // ── Fretboard (Plotly.js) ─────────────────────────────────────────────────────
 
 function buildFretboardData() {
+  const fbHash = `${state.tonic}|${state.scale}|${state.mode}|${state.numStrings}|${state.strings.slice(0, state.numStrings).join(',')}`;
+  if (fbHash !== _fretboardStateHash) {
+    if (_fretboardStateHash) clickedPositions.clear();
+    _fretboardStateHash = fbHash;
+  }
   const tc = THEMES[state.theme] || THEMES.light;
-  const lineStyle     = { color: tc.line, width: 2 };   // nut
-  const thinLineStyle = { color: tc.line, width: 0.75 }; // frets + strings
+  const lineStyle     = { color: tc.annotation, width: 2 };   // nut
+  const thinLineStyle = { color: tc.annotation, width: 0.75 }; // frets + strings
   const NOTE_PATTERN = /^[A-G](?:b|#)?(?:[0-9]|10)$/;
 
   const stringLabels = state.strings.slice(0, state.numStrings).map(validateNote);
@@ -1572,6 +1636,7 @@ function buildFretboardData() {
     fretPositions.push(xPrev + (x - xPrev) / 2);
     xPrev = x;
   }
+  _fretPositionsCache = [...fretPositions];
 
   // String lines + positions
   const stringPositions = [];
@@ -1587,16 +1652,17 @@ function buildFretboardData() {
     const fx = fretPositions[fi - 1];
     if (fi % 12 !== 0) {
       traces.push({ x:[fx], y:[-STRING_SCALE_FACTOR], mode:'markers',
-        line:{ color:tc.line, width:2 }, hovertemplate:`${fi}<extra></extra>`, type:'scatter' });
+        line:{ color:tc.annotation, width:2 }, hovertemplate:`${fi}<extra></extra>`, type:'scatter' });
     } else {
       traces.push({ x:[fx-0.05,fx+0.05], y:[-STRING_SCALE_FACTOR,-STRING_SCALE_FACTOR],
-        mode:'markers', line:{ color:tc.line, width:2 },
+        mode:'markers', line:{ color:tc.annotation, width:2 },
         hovertemplate:`${fi}<extra></extra>`, type:'scatter' });
     }
   }
 
   // Note markers per string
   const strPosRev = [...stringPositions].reverse();
+  _stringPositionsRev = [...strPosRev];
   for (let si = 0; si < state.numStrings; si++) {
     const baseNote = stringLabels[si];
     const y = strPosRev[si];
@@ -1655,6 +1721,18 @@ function buildFretboardData() {
     }
   }
 
+  // ── Clicked position highlights (chord ID mode) ──────────────────────────────
+  if (clickedPositions.size > 0 && !state.activeChord && !state.baseAltChord && !state.transitionChord) {
+    for (const [key] of clickedPositions) {
+      const [si, fi] = key.split(',').map(Number);
+      if (si >= strPosRev.length) continue;
+      const x = fi === 0 ? 0 : fretPositions[fi - 1];
+      const y = strPosRev[si];
+      traces.push({ x:[x], y:[y], mode:'markers', hoverinfo:'skip', type:'scatter',
+        cliponaxis: false, marker:{ symbol:'circle', color:tc.click_fill, size:22 } });
+    }
+  }
+
   // Pin the y-axis range explicitly so that large MIDI markers (circle-open,
   // size 26) do not cause Plotly to add extra padding and compress string spacing.
   const yDataMin = -STRING_SCALE_FACTOR;                              // fret-dot row
@@ -1705,11 +1783,128 @@ function addNoteMarker(traces, x, y, note, root, notesInScale, notesInChord, cho
   }
 }
 
+// ── Chord identification from clicked positions ───────────────────────────────
+
+function identifyChords(noteNames) {
+  // Order distinct pitch classes by the actual pitch (ascending) of their lowest
+  // occurrence, so orderedPcs[0] is the bass note's pitch class.
+  const withMidi = noteNames
+    .map(n => ({ midi: noteNameToMidi(n), pc: notePitchClass(n) }))
+    .filter(o => o.pc >= 0)
+    .sort((a, b) => a.midi - b.midi);
+  const seenPc = new Set();
+  const orderedPcs = [];
+  for (const { pc } of withMidi) {
+    if (!seenPc.has(pc)) { seenPc.add(pc); orderedPcs.push(pc); }
+  }
+  if (orderedPcs.length < 3) return [];
+
+  const bassPc  = orderedPcs[0];
+  const allPcs  = new Set(orderedPcs);
+  const useFlats = shouldUseFlats(state.tonic, state.scale, state.mode);
+  const pcName = pc => displayNote(noteName(enharmonic(NOTE_NAMES[pc] + '4', useFlats), useFlats));
+
+  const results = [];
+  // Try each distinct pitch class as root, in ascending bass-pitch order: a match
+  // rooted on the bass note is a root-position chord (presented first); a match
+  // rooted on a higher note means the bass is a chord tone — an inversion.
+  for (const root of orderedPcs) {
+    const intervals = new Set([...allPcs].map(pc => (pc - root + 12) % 12));
+    for (const [type, ints] of Object.entries(CHORD_INTERVALS)) {
+      const typePCs = new Set(ints.map(iv => iv % 12));
+      if (typePCs.size === intervals.size && [...typePCs].every(iv => intervals.has(iv))) {
+        const chordName = pcName(root) + (CHORD_TYPE_DISPLAY[type] ?? type);
+        results.push(root === bassPc ? chordName : `${chordName}/${pcName(bassPc)}`);
+      }
+    }
+  }
+  return results;
+}
+
+function renderClickedChordId() {
+  const el = document.getElementById('chord-id-display');
+  if (!el) return;
+  const count = clickedPositions.size;
+  if (count === 0 || state.activeChord || state.baseAltChord || state.transitionChord) {
+    el.textContent = '';
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'block';
+  if (count < 3) {
+    const need = 3 - count;
+    el.textContent = `${need} more note${need > 1 ? 's' : ''} needed to identify chord`;
+    el.style.opacity = '0.5';
+    el.style.fontSize = '13px';
+  } else {
+    const chords = identifyChords([...clickedPositions.values()]);
+    el.textContent = chords.length ? chords.join('  –  ') : '—';
+    el.style.opacity = '1';
+    el.style.fontSize = '';
+  }
+}
+
+function handleFretboardClick(e) {
+  if (state.activeChord || state.baseAltChord || state.transitionChord) return;
+  if (!_fretPositionsCache.length || !_stringPositionsRev.length) return;
+  const div = document.getElementById('fretboard');
+  const layout = div._fullLayout;
+  if (!layout) return;
+  const rect = div.getBoundingClientRect();
+  const px = e.clientX - rect.left - layout.margin.l;
+  const py = e.clientY - rect.top  - layout.margin.t;
+  const plotW = layout.width  - layout.margin.l - layout.margin.r;
+  const plotH = layout.height - layout.margin.t - layout.margin.b;
+  if (px < 0 || px > plotW || py < 0 || py > plotH) return;
+  const xRange = layout.xaxis.range;
+  const yRange = layout.yaxis.range;
+  const dataX = xRange[0] + (px / plotW) * (xRange[1] - xRange[0]);
+  const dataY = yRange[1] - (py / plotH) * (yRange[1] - yRange[0]);
+  // Snap to nearest string (y-axis); reject if click is too far between strings
+  let bestSi = -1, bestSiDist = Infinity;
+  for (let si = 0; si < _stringPositionsRev.length; si++) {
+    const d = Math.abs(_stringPositionsRev[si] - dataY);
+    if (d < bestSiDist) { bestSiDist = d; bestSi = si; }
+  }
+  if (bestSiDist > STRING_SCALE_FACTOR * 0.55) return;
+  // Snap to nearest fret (0=open string, 1..NUM_FRETS=fretted positions)
+  const allX = [0, ..._fretPositionsCache];
+  let bestFi = 0, bestFiDist = Math.abs(allX[0] - dataX);
+  for (let i = 1; i < allX.length; i++) {
+    const d = Math.abs(allX[i] - dataX);
+    if (d < bestFiDist) { bestFiDist = d; bestFi = i; }
+  }
+  const si = bestSi, fi = bestFi;
+  const stringLabels = state.strings.slice(0, state.numStrings).map(validateNote);
+  if (si >= stringLabels.length) return;
+  const note = fi === 0 ? stringLabels[si] : transposeNote(stringLabels[si], fi);
+  const key = `${si},${fi}`;
+  const wasSelected = clickedPositions.has(key);
+  // Remove any existing selection on this string (one per string maximum)
+  for (const k of clickedPositions.keys()) {
+    if (k.startsWith(`${si},`)) { clickedPositions.delete(k); break; }
+  }
+  // Same position clicked again = deselect; different position = replace with new
+  if (!wasSelected) clickedPositions.set(key, note);
+  renderClickedChordId();
+  const fig = buildFretboardData();
+  if (fig) Plotly.react('fretboard', fig.traces, fig.layout, { displayModeBar:false, responsive:true });
+}
+
+function bindFretboardClick() {
+  const div = document.getElementById('fretboard');
+  if (div && !div._clickHandlerBound) {
+    div.addEventListener('click', handleFretboardClick);
+    div._clickHandlerBound = true;
+  }
+}
+
 function renderFretboard() {
   const fig = buildFretboardData();
   if (!fig) return;
   Plotly.react('fretboard', fig.traces, fig.layout, { displayModeBar:false, responsive:true });
   renderChordDiagrams();
+  renderClickedChordId();
 }
 
 // ── Chord voicing finder ─────────────────────────────────────────────────────
@@ -1953,7 +2148,7 @@ function drawChordDiagramSVG(frets, chordNotes, labels, stringNotes, numStrings)
 
   // Nut (thick bar) or position number
   if (isAtNut) {
-    svg.appendChild(mk('rect', { x: ML, y: MT, width: gridW, height: NUT, fill: tc.line }));
+    svg.appendChild(mk('rect', { x: ML, y: MT, width: gridW, height: NUT, fill: tc.annotation }));
   } else {
     svg.appendChild(mk('text', {
       x: ML - 14, y: gridTop + FH * 0.68,
@@ -1965,7 +2160,7 @@ function drawChordDiagramSVG(frets, chordNotes, labels, stringNotes, numStrings)
   for (let f = isAtNut ? 1 : 0; f <= NFRETS; f++) {
     const y = gridTop + f * FH;
     svg.appendChild(mk('line', {
-      x1: ML, y1: y, x2: ML + gridW, y2: y, stroke: tc.line, 'stroke-width': '1'
+      x1: ML, y1: y, x2: ML + gridW, y2: y, stroke: tc.annotation, 'stroke-width': '1'
     }));
   }
 
@@ -1973,7 +2168,7 @@ function drawChordDiagramSVG(frets, chordNotes, labels, stringNotes, numStrings)
   for (let d = 0; d < numStrings; d++) {
     const x = ML + d * SS;
     svg.appendChild(mk('line', {
-      x1: x, y1: gridTop, x2: x, y2: gridTop + gridH, stroke: tc.line, 'stroke-width': '1'
+      x1: x, y1: gridTop, x2: x, y2: gridTop + gridH, stroke: tc.annotation, 'stroke-width': '1'
     }));
   }
 
@@ -2306,7 +2501,7 @@ function init() {
   const themeSel = document.getElementById('theme-select');
   for (const t of Object.keys(THEMES)) {
     const el = document.createElement('option');
-    el.value = t; el.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    el.value = t; el.textContent = THEMES[t].label ?? (t.charAt(0).toUpperCase() + t.slice(1));
     themeSel.appendChild(el);
   }
   themeSel.value = state.theme;
@@ -2358,6 +2553,7 @@ function init() {
   renderStringVisibility();
   renderChordButtons();
   renderFretboard();
+  bindFretboardClick();
 
   // Controls
   numStrSel.addEventListener('change', () => {

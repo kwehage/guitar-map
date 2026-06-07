@@ -35,6 +35,19 @@
       --gm-secondary-btn-bg:   rgba(205,214,244,0.3);
       --gm-secondary-btn-text: #cdd6f4;
     }
+    [data-theme="blackMetal"] {
+      --gm-bg:                 #000000;
+      --gm-surface:            #160707;
+      --gm-text:               #c9a0a0;
+      --gm-border:             #5a1414;
+      --gm-btn-bg:             #220a0a;
+      --gm-btn-text:           #d8b0b0;
+      --gm-input-bg:           #160707;
+      --gm-active-btn-bg:      rgba(184,0,31,0.85);
+      --gm-active-btn-text:    #f0dede;
+      --gm-secondary-btn-bg:   rgba(184,0,31,0.25);
+      --gm-secondary-btn-text: #d8b0b0;
+    }
 
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -250,7 +263,8 @@
       align-items: center;
       flex-shrink: 0;
       margin-left: auto;
-      margin-top: -25px;
+      height: 311px;
+      overflow: hidden;
     }
     .cof-title {
       font-size: 11px;
@@ -259,6 +273,17 @@
     }
     #circle-of-fifths {
       position: relative;
+      margin-top: -25px;
+    }
+
+    /* ── Chord ID display (click-to-identify mode) ── */
+    #chord-id-display {
+      display: none;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      padding: 4px 10px 2px 10px;
     }
 
     /* ── Fretboard ── */
@@ -462,6 +487,7 @@
   </div>
 </div>
 
+<div id="chord-id-display"></div>
 <div id="fretboard"></div>
 <div id="chord-diagrams"></div>
 
@@ -470,7 +496,7 @@
   <div class="modal-content">
     <div class="modal-title">Preferences</div>
     <div class="modal-body">
-      <label for="theme-select">Theme</label>
+      <label for="theme-select">Color Theme</label>
       <select id="theme-select" style="width:140px"></select>
     </div>
     <div class="modal-body">
