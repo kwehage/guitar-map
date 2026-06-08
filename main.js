@@ -16,7 +16,7 @@ function createWindow() {
   mainWindow.maximize();
 
   const indexPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'dist', 'index.html')
+    ? path.join(process.resourcesPath, 'app.asar', 'dist', 'index.html')
     : path.join(__dirname, 'dist', 'index.html');
 
   mainWindow.loadFile(indexPath);

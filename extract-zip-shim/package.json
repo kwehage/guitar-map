@@ -1,0 +1,10 @@
+{
+  "name": "extract-zip",
+  "version": "2.0.1",
+  "description": "Drop-in replacement for extract-zip using adm-zip, which works on modern Node.js (extract-zip's yauzl-based streaming extraction stalls after one entry on Node 24+)",
+  "main": "index.js",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  }
+}
