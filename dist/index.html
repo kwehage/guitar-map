@@ -500,6 +500,13 @@
       <select id="theme-select" style="width:140px"></select>
     </div>
     <div class="modal-body">
+      <label for="max-voicings">Max chord voicings</label>
+      <input type="number" id="max-voicings" min="10" max="1000" step="10" style="width:80px">
+    </div>
+    <div id="max-voicings-status" style="font-size:13px; margin:-12px 0 16px 0; opacity:0.6;">
+      Caps how many chord voicings the search returns — lower values can improve performance on slower devices.
+    </div>
+    <div class="modal-body">
       <label for="tuning-select">Tuning</label>
       <select id="tuning-select" style="width:360px"></select>
     </div>

@@ -596,6 +596,7 @@ function persistState() {
   const s = {
     num_strings: state.numStrings,
     tonic: state.tonic, scale: state.scale, mode: state.mode, theme: state.theme,
+    max_chord_voicings: state.maxChordVoicings,
     midiDeviceId: state.midiDeviceId,
     midiOutputId: state.midiOutputId,
   };
@@ -613,6 +614,7 @@ const state = {
   scale: saved?.scale ?? '2212221',
   mode:  saved?.mode  ?? 0,
   theme: saved?.theme ?? 'dark',
+  maxChordVoicings: saved?.max_chord_voicings ?? 500,
   midiDeviceId: saved?.midiDeviceId ?? null,
   midiOutputId: saved?.midiOutputId ?? null,
   activeChord: null,
@@ -2263,7 +2265,7 @@ function renderChordDiagrams() {
   if (!notesInChord.length) return;
 
   const stringNotes = state.strings.slice(0, state.numStrings).map(validateNote);
-  const voicings = findChordVoicings(notesInChord, stringNotes, state.numStrings);
+  const voicings = findChordVoicings(notesInChord, stringNotes, state.numStrings, state.maxChordVoicings);
 
   const posOf = frets => {
     const fs = frets.filter(f => f > 0);
@@ -2317,7 +2319,8 @@ function renderChordDiagrams() {
 
 function saveToFile() {
   const s = { num_strings: state.numStrings, tonic: state.tonic,
-              scale: state.scale, mode: state.mode, theme: state.theme };
+              scale: state.scale, mode: state.mode, theme: state.theme,
+              max_chord_voicings: state.maxChordVoicings };
   for (let i = 0; i < 10; i++) s[`string_${i+1}`] = state.strings[i];
   const blob = new Blob([JSON.stringify(s, null, 2)], { type:'application/json' });
   const a = document.createElement('a');
@@ -2337,11 +2340,13 @@ function applyLoadedSettings(data) {
   if (data.scale != null) state.scale = data.scale;
   if (data.mode  != null) state.mode  = data.mode;
   if (data.theme != null) state.theme = data.theme;
+  if (data.max_chord_voicings != null) state.maxChordVoicings = data.max_chord_voicings;
 
   document.getElementById('num-strings').value = state.numStrings;
   document.getElementById('tonic').value = state.tonic;
   document.getElementById('scale').value = state.scale;
   document.getElementById('theme-select').value = state.theme;
+  document.getElementById('max-voicings').value = state.maxChordVoicings;
   for (let i = 1; i <= 10; i++) {
     document.getElementById(`string-${i}`).value = state.strings[i-1];
   }
@@ -2367,7 +2372,8 @@ function openFromFile() {
 
 function getSettings() {
   const s = { num_strings: state.numStrings, tonic: state.tonic,
-              scale: state.scale, mode: state.mode, theme: state.theme };
+              scale: state.scale, mode: state.mode, theme: state.theme,
+              max_chord_voicings: state.maxChordVoicings };
   for (let i = 0; i < 10; i++) s[`string_${i+1}`] = state.strings[i];
   return s;
 }
@@ -2535,6 +2541,10 @@ function init() {
   }
   themeSel.value = state.theme;
 
+  // Max chord voicings (in preferences modal)
+  const maxVoicingsInput = document.getElementById('max-voicings');
+  maxVoicingsInput.value = state.maxChordVoicings;
+
   applyTheme();
   buildStringInputs();
   buildChordButtonGrid();
@@ -2641,6 +2651,14 @@ function init() {
     renderTransitionNotes();
     renderFretboard();
     renderCircleOfFifths();
+  });
+
+  maxVoicingsInput.addEventListener('change', () => {
+    const v = parseInt(maxVoicingsInput.value);
+    state.maxChordVoicings = Number.isFinite(v) ? Math.min(1000, Math.max(10, v)) : 500;
+    maxVoicingsInput.value = state.maxChordVoicings;
+    persistState();
+    renderChordDiagrams();
   });
 
   // Preferences modal — opened by the Electron menu (hidden btn) or the visible gear button
