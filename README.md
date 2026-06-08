@@ -172,7 +172,7 @@ npm start          # opens the app in an Electron window
 
 ### MIDI input — highlight notes and play audio
 
-Connect a MIDI controller and select it in **⚙ Preferences → MIDI Input**. Notes played on the device are highlighted on the fretboard in yellow and played back through a synthetic plucked-string sound. Octave is respected — playing E2 highlights only E2 positions, not every E on the neck.
+Connect a MIDI controller and select it in **⚙ Preferences → MIDI Input**. Notes played on the device are highlighted on the fretboard and played back through a synthetic plucked-string sound. Octave is respected — playing E2 highlights only E2 positions, not every E on the neck.
 
 ### MIDI output — send chord voicings to a DAW
 
