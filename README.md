@@ -1,33 +1,63 @@
 # Guitar Map
 
-Guitar Map is a tool to procedurally generate and display fretboard diagrams for 4–10 string guitars and basses. It is intended to help guitarists familiarize themselves with the fretboard and basic music theory, particularly when using non-standard tunings or more than six strings.
+Guitar Map is a totally unique tool for learning the guitar fretboard as every diagram is procedurally generated, for any tuning — standard, drop, open, extended-range, or fully custom string-by-string configurations, for 4–10 string guitars and basses. Rather than drawing from a fixed library of hard-coded shapes the way most guitar fretboard apps do, Guitar Map computes scale positions, chord voicings, and note relationships from scratch for whatever tuning you select, covering most scales and modes in Western music. It is intended to help guitarists familiarize themselves with the fretboard, basic music theory, and understand the relationships between chords, particularly when using non-standard tunings or more than six strings.
+
+What's more, Guitar Map is completely free. You can simply point your desktop or tablet browser to **[https://kwehage.github.io/guitar-map/](https://kwehage.github.io/guitar-map/)**. Or if you'd prefer a desktop experience, Guitar Map is also bundled as a standalone Electron application, which you can download from the releases page. Use the application completely without restriction for as long as you like. If you find it useful and want to contribute to the development of the app, you can buy me a coffee at the link below, or file bug reports or feature requests on this GitHub page (please check the [Known limitations](#known-limitations) section before submitting your feedback).
+
+[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=kwehage&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/kwehage)
+
+![fretboard](doc/fretboard.png)
+
+## Table of contents
+
+* [Inputs](#inputs)
+* [Outputs](#outputs)
+* [Settings](#settings)
+  * [Saving your settings](#saving-your-settings)
+  * [Color Themes](#color-themes)
+* [Using Guitar Map](#using-guitar-map)
+  * [Option 1 — Web app (recommended)](#option-1-web-app-recommended)
+  * [Option 2 — Electron desktop app](#option-2-electron-desktop-app)
+* [MIDI](#midi)
+  * [MIDI input — highlight notes and play audio](#midi-input-highlight-notes-and-play-audio)
+  * [MIDI output — send chord voicings to a DAW](#midi-output-send-chord-voicings-to-a-daw)
+  * [Setting up a virtual MIDI port](#setting-up-a-virtual-midi-port)
+  * [Sharing a MIDI controller between Guitar Map and a DAW simultaneously](#sharing-a-midi-controller-between-guitar-map-and-a-daw-simultaneously)
+* [Known limitations](#known-limitations)
+* [License](#license)
+
+## Inputs
 
 The tool allows you to configure:
-* **Tuning**: choose from 27+ named presets spanning 4–8 string bass and guitar configurations — including standard, drop, open, and extended-range tunings (e.g. 7-string B Standard, 8-string Drop E, DADGAD, Mirar) — or select **Custom** to enter each string's pitch individually for a configurable number of strings up to 10.
-* Tonic (root note) of the first mode of the scale — for example, inputting C as the tonic for the diatonic scale with the Ionian (natural major) mode selected produces a C-Major scale; selecting the Aeolian (natural minor) mode produces a relative A-minor scale.
-* Scale (diatonic, harmonic minor, melodic minor, Hungarian minor, pentatonic, blues, augmented, diminished — hover over a mode name for a tooltip listing alternate names)
-* Mode of the scale
+* **Tuning**: from the preferences dialog, choose from 27+ named presets spanning 4–8 string bass and guitar configurations — including standard, drop, open, and extended-range tunings (e.g. 7-string B Standard, 8-string Drop E, DADGAD, Mirar) — or select **Custom** to enter each string's pitch individually for a configurable number of strings up to 10.
+* **Tonic** (root note) of the first mode of the scale — for example, inputting C as the tonic for the diatonic scale with the Ionian (natural major) mode selected produces a C-Major scale; selecting the Aeolian (natural minor) mode produces a relative A-minor scale.
+* **Scale** (diatonic, harmonic minor, melodic minor, Hungarian minor, pentatonic, blues, augmented, diminished — hover over a mode name for a tooltip listing alternate names)
+* **Mode** of the scale
+
+## Outputs
 
 From those inputs it displays:
-* A fretboard diagram with every position labelled — hover over any position to see the note name and frequency in Hz.
-* All notes in the scale highlighted with circles; the tonic of the current mode is shown in black.
-* All diatonic chords for the scale; click a chord to display every matching position on the fretboard.
+* **A fretboard diagram**: with every position labeled — hover over any position to see the note name and frequency in Hz.
+* **All notes in the scale highlighted** with circles; the tonic of the current mode is shown in black.
+* **All diatonic chords for the scale**; click a chord to display every matching position on the fretboard.
 * **Chord notes**: when a chord is selected, its notes are displayed as labeled / color-coded "chips". Clicking a tonic alteration chord (Neapolitan, ♭III, iv, ♭VI, ♭VII) shows its notes the same way.
 * **Chord transition display**: when a transition or borrowed chord is also selected, a ↓ arrow appears and a second row of chips shows the notes of the target chord, making it easy to see voice-leading between two chords.
-* For each chord, common out-of-key transitions: secondary dominant, chromatic mediants (major and minor third up and down).
-* Borrowed chord suggestions from parallel modes of the same scale.
-* Tonic alteration chords: Neapolitan (♭II), ♭III, minor subdominant (iv), ♭VI, and subtonic (♭VII). If any of the altered chords are diatonic to the selected scale (e.g. they already show up in the list of diatonic chords, they will render as greyed out -- they don't actually alter the key for the given scale/mode selected).
+* **Common out-of-key chord transitions**: secondary dominant, chromatic mediants (major and minor third up and down).
+* **Borrowed chord suggestions**: from parallel modes of the same scale.
+* **Tonic alteration chords**: Neapolitan (♭II), ♭III, minor subdominant (iv), ♭VI, and subtonic (♭VII). If any of the altered chords are diatonic to the selected scale (e.g. they already show up in the list of diatonic chords, they will render as grayed out — they don't actually alter the key for the given scale/mode selected).
 * A **Circle of Fifths** diagram that highlights the active key, shows the relative major/minor relationship, and displays the standard diatonic key signature — treble clef, sharps, and flats — for all twelve keys around the perimeter.
 * **Click-to-identify chords**: when no chord is selected, click directly on the fretboard to pick out notes — one selection per string; clicking a different position on a string replaces the previous choice, and clicking the same position again clears it. Once three or more notes are selected, Guitar Map works out every chord that matches them, testing each note as a possible root so inversions are recognized too (shown in slash notation, e.g. `C/E`), and displays the result centered above the diagram. Picking a chord from the chord list clears the click selection.
 
+## Settings
+
+### Saving your settings
 Settings (tuning preset, tonic, scale, mode, and color theme) are saved automatically in browser local storage and restored on next launch. Named settings files can be exported and re-imported via **File → Save / Open** (note this feature is only supported on the Electron desktop app).
 
+### Color Themes
 **Color Theme** (set in **⚙ Preferences → Color Theme**) changes the look of the fretboard, chord diagrams, Circle of Fifths, and surrounding interface. Three themes are available:
 * **Light Jazz** — a clean, bright theme with crisp black-on-white contrast, luminous and expressive.
 * **Blues** — a cool, low-contrast dark theme in deep indigo and periwinkle, evoking twilight skies over the Mississippi Delta — the birthplace of the blues.
 * **Black Metal** — an evil, stark black-and-red theme with its own dissonance color palette dominated by embers, oxblood, and crimson — with a sickly acid green and a frostbitten ash-blue reserved for the harshest dissonances (the minor second and the tritone) so the "wrong" notes visually recoil.
-
-![fretboard](doc/fretboard.png)
 
 ## Using Guitar Map
 
@@ -94,7 +124,7 @@ update-desktop-database ~/.local/share/applications
 ##### macOS
 
 * Download the `.dmg` from the releases page.
-* Double-click the dmg and drag the guitar-map application to your Applications folder.
+* Double-click the `.dmg` and drag the Guitar Map application to your Applications folder.
 
 If macOS reports that the application is damaged and cannot be opened, this is Apple's Gatekeeper quarantine policy for applications distributed outside the App Store. Remove the quarantine attribute from the terminal:
 
@@ -108,7 +138,7 @@ See [this guide](https://osxdaily.com/2019/02/13/fix-app-damaged-cant-be-opened-
 ##### Windows
 
 * Download and run the `.exe` installer from the releases page.
-* Launch guitar-map from the Start menu or desktop shortcut.
+* Launch Guitar Map from the Start menu or desktop shortcut.
 
 #### Building from source
 
@@ -129,7 +159,7 @@ npm run prebuild   # copies Plotly.js into dist/
 npm run make       # produces the AppImage under out/make/
 ```
 
-The AppImage will be written to `out/make/appimage/x64/guitar-map-*.AppImage`.
+The AppImage will be written to `out/make/AppImage/x64/guitar-map-*.AppImage`.
 
 To run without packaging:
 
@@ -203,3 +233,7 @@ By default on Windows, a MIDI input port can only be opened by one application a
 * **Key signatures on the Circle of Fifths** are fixed to the standard diatonic (natural major / natural minor) key signatures for all twelve positions, regardless of the scale selected. For non-diatonic scales such as harmonic minor, melodic minor, or Hungarian minor, the raised or lowered scale degrees are not reflected in the displayed key signatures. Properly annotating these alterations (e.g. showing G♯ as an in-score accidental for A harmonic minor) is planned for a future release.
 * **Chord voicing playability**: the chord-finding algorithm uses heuristics to discard obviously unplayable shapes (excessive hand span, large string skips), but the filtering is imperfect. Some displayed voicings may still be difficult or impossible to play, and occasionally playable shapes may be excluded. It is up to the player to judge which highlighted positions form practical chord shapes or arpeggios.
 * **Audio and MIDI**: Guitar Map provides basic chord playback via Karplus-Strong synthesis and can send chord notes to an external instrument or DAW via MIDI output. While these features offer a useful way to audition chords, the app is primarily a learning tool for understanding the relationships between scales, modes, chords, and voicings on the fretboard — not a virtual instrument or performance tool.
+
+## License
+
+Guitar Map is licensed under the [Apache License 2.0](LICENSE).

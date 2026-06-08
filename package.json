@@ -20,7 +20,7 @@
     "type": "git",
     "url": "git+https://github.com/kwehage/guitar-map.git"
   },
-  "license": "ISC",
+  "license": "Apache-2.0",
   "author": "Kristopher Wehage",
   "type": "commonjs",
   "main": "main.js",
